@@ -38,8 +38,11 @@ public:
 	std::pair<int, int> GetResolution() const;
 	void SetResolution(int width, int height);
 
-	SDL_Window* GetWindow();
+	SDL_Window* GetWindow() const;
 	void SetWindow(SDL_Window* _window);
+
+	SDL_Renderer* GetRenderer() const;
+	void SetRenderer(SDL_Renderer* _renderer);
 
 	void SaveSettings();
 	void LoadSettings();
@@ -60,4 +63,5 @@ private:
 	static std::pair<int, int> resolution;
 
 	static SDL_Window* window;
+	static SDL_Renderer* renderer;
 };

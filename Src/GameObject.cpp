@@ -4,8 +4,8 @@
 GameObject::GameObject(const char* textureSheet, const char* bulletTextureSheet, int x, int y)
 {
 	// Load sprite texture and bullet texture
-	objTexture = TextureManager::LoadTexture(textureSheet, Game::renderer);
-	bulletTexture = TextureManager::LoadTexture(bulletTextureSheet, Game::renderer);
+	//objTexture = TextureManager::LoadTexture(textureSheet, Game::renderer);
+	//bulletTexture = TextureManager::LoadTexture(bulletTextureSheet, Game::renderer);
 
 	destRect.x = x;
 	destRect.y = y;
@@ -24,14 +24,14 @@ GameObject::GameObject(const char* textureSheet, const char* bulletTextureSheet,
 	float scale = std::min(widthRatio, heightRatio);
 
 	// Calculate the scaled size of the object
-	float scaledSize = 64 * scale;
+	float scaledSize = 96 * scale;
 
 	// Calculate the new position with adjusted pivot point
 	destRect.x = static_cast<int>(x * widthRatio - (scaledSize / 2));
 	destRect.y = static_cast<int>(y * heightRatio - (scaledSize / 2));
 
-	destRect.w = static_cast<int>(64 * scale);
-	destRect.h = static_cast<int>(64 * scale);
+	destRect.w = static_cast<int>(96 * scale);
+	destRect.h = static_cast<int>(96 * scale);
 
 	bulletDestRect.w = static_cast<int>(32 * scale);
 	bulletDestRect.h = static_cast<int>(32 * scale);
@@ -39,6 +39,9 @@ GameObject::GameObject(const char* textureSheet, const char* bulletTextureSheet,
 
 GameObject::~GameObject()
 {
+	std::cout << "GameObject destructor called" << std::endl;
+	SDL_DestroyTexture(objTexture);
+	SDL_DestroyTexture(bulletTexture);
 }
 
 // update function
@@ -60,11 +63,11 @@ void GameObject::Update()
 // render function
 void GameObject::Render()
 {
-	SDL_RenderCopy(Game::renderer, objTexture, NULL, &destRect);
-	if (isShotActive)
-	{
-		SDL_RenderCopy(Game::renderer, bulletTexture, NULL, &bulletDestRect);
-	}
+	//SDL_RenderCopy(Game::renderer, objTexture, NULL, &destRect);
+	//if (isShotActive)
+	//{
+	//	SDL_RenderCopy(Game::renderer, bulletTexture, NULL, &bulletDestRect);
+	//}
 }
 
 // movement function
@@ -90,20 +93,12 @@ void GameObject::Shoot()
 	isShotActive = true;
 }
 
-// destroy and clean up game object
-void GameObject::Clear()
-{
-	SDL_DestroyTexture(objTexture);
-	SDL_DestroyTexture(bulletTexture);
-}
-
 // take damage function
 bool GameObject::TakeDamage()
 {
 	health--;
 	if (health <= 0)
 	{
-		Clear();
 		return true;
 	}
 	else

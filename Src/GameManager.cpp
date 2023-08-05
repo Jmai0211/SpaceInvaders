@@ -11,6 +11,7 @@ GameManager::GameState GameManager::state = GameManager::GameState::Menu;
 GameManager::Language GameManager::language = GameManager::Language::English;
 std::pair<int, int> GameManager::resolution = std::make_pair(1920, 1080);
 SDL_Window* GameManager::window = nullptr;
+SDL_Renderer* GameManager::renderer = nullptr;
 
 // return instance of game manager
 GameManager& GameManager::GetInstance()
@@ -92,7 +93,7 @@ void GameManager::SetResolution(int width, int height)
 }
 
 // get window reference
-SDL_Window* GameManager::GetWindow()
+SDL_Window* GameManager::GetWindow() const
 {
     return window;
 }
@@ -101,6 +102,16 @@ SDL_Window* GameManager::GetWindow()
 void GameManager::SetWindow(SDL_Window* _window)
 {
     window = _window;
+}
+
+SDL_Renderer* GameManager::GetRenderer() const
+{
+    return renderer;
+}
+
+void GameManager::SetRenderer(SDL_Renderer* _renderer)
+{
+    renderer = _renderer;
 }
 
 // save game settings to a file

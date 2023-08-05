@@ -1,28 +1,32 @@
 cmake_minimum_required(VERSION 3.0)
 project(SpaceInvaders)
 
-# Set the source, include, and library directories
+# set directories
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Src")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Include")
 set(LIBRARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Libraries")
-
+set(ECS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Include/ECS")
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Assets")
 
-# Add all the source files in the "src" folder to your executable
+# Add all the source files to the executable (for building the exe)
 file(GLOB_RECURSE SOURCE_FILES "${SOURCE_DIR}/*.cpp")
-
-# Add all the header files in the "include" folder to your project
 file(GLOB_RECURSE HEADER_FILES "${INCLUDE_DIR}/*.h")
+file(GLOB_RECURSE ECS_FILES "${ECS_DIR}/*.h")
 
-# Create the executable using the project name as the target name
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${ECS_FILES})
 
 # Include directories for the executable target
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Src
     ${CMAKE_CURRENT_SOURCE_DIR}/Include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Include/ECS
 )
+
+# Organize source files into virtual folders in the IDE solution
+source_group("Source Files" FILES ${SOURCE_FILES})
+source_group("Header Files" FILES ${HEADER_FILES})
+source_group("ECS" FILES ${ECS_FILES})
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE

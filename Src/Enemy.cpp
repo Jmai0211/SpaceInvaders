@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include <random>
 #include <iostream>
+#include <LevelManager.h>
 
 Enemy::Enemy(const char* textureSheet, const char* bulletTextureSheet, int x, int y, int _health) : GameObject(textureSheet, bulletTextureSheet, x, y)
 {
@@ -12,6 +13,11 @@ Enemy::Enemy(const char* textureSheet, const char* bulletTextureSheet, int x, in
 	bulletRect.w = 16;
 
 	bulletSpeed = 5;
+}
+
+Enemy::~Enemy()
+{
+	GameObject::~GameObject();
 }
 
 // get random chance for shooting

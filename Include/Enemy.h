@@ -6,6 +6,7 @@ class Enemy : public GameObject
 {
 public:
 	Enemy(const char* textureSheet, const char* bulletTextureSheet, int x, int y, int _health);
+	~Enemy();
 
 	// enemy info
 	int baseScore;
