@@ -2,6 +2,7 @@
 #include "TextManager.h"
 #include "GameManager.h"
 #include <iostream>
+#include "Game.h"
 
 Text::Text(int x, int y, const char* _text)
 {
@@ -47,7 +48,7 @@ void Text::GenerateTexture()
 		std::cout << "Failed to render text: " << TTF_GetError() << std::endl;
 	}
 
-	texture = SDL_CreateTextureFromSurface(GameManager::GetInstance().GetRenderer(), surface);
+	texture = SDL_CreateTextureFromSurface(Game::renderer, surface);
 }
 
 // update text with new text
@@ -98,7 +99,7 @@ void Text::render()
 	destRect.h = scaledHeight;
 
 	// Render the text
-	SDL_RenderCopy(GameManager::GetInstance().GetRenderer(), texture, NULL, &destRect);
+	SDL_RenderCopy(Game::renderer, texture, NULL, &destRect);
 }
 
 // update the scale of the text

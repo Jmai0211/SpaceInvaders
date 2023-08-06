@@ -11,13 +11,13 @@ class Entity;
 
 using ComponentID = std::size_t;
 
-ComponentID GetComponentTypeID()
+inline ComponentID GetComponentTypeID()
 {
 	static ComponentID lastID = 0;
 	return lastID++;
 }
 
-template <typename T> ComponentID GetComponentTypeID() noexcept
+template <typename T> inline ComponentID GetComponentTypeID() noexcept
 {
 	static ComponentID typeID = GetComponentTypeID();
 	return typeID;
@@ -58,7 +58,7 @@ public:
 
 	template <typename T> bool hasComponent() const
 	{
-		return ComponentBitSet[GetComponentID<T>];
+		return componentBitSet[GetComponentTypeID<T>()];
 	}
 
 	// add component to the entity

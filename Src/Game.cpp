@@ -8,15 +8,24 @@
 #include "text.h"
 #include "MainMenu.h"
 #include "Components.h"
+#include "CollisionManager.h"
+#include "Map.h"
 
 Text* scoreText;
 Text* healthText;
 
 MainMenu menu;
+Map* map;
+
 EntityManager eManager;
 
 Entity& player = eManager.AddEntity();
 std::vector<Entity*> enemies;
+
+std::vector<ColliderComponent*> Game::colliders;
+
+SDL_Renderer* Game::renderer = nullptr;
+SDL_Window* Game::window = nullptr;
 
 Game::Game()
 {
@@ -40,21 +49,21 @@ void Game::Init(const char* title, int xPos, int yPos)
 		SDL_Surface* iconSurface = IMG_Load("Assets/Logo.png");
 
 		// create a window
-		GameManager::GetInstance().SetWindow(SDL_CreateWindow(title, xPos, yPos, GameManager::GetInstance().GetResolution().first, GameManager::GetInstance().GetResolution().second, flags));
+		window = SDL_CreateWindow(title, xPos, yPos, GameManager::GetInstance().GetResolution().first, GameManager::GetInstance().GetResolution().second, flags);
 		
-		if (GameManager::GetInstance().GetWindow())
+		if (window)
 		{
 			std::cout << "Window created!" << std::endl;
 
 			// set window icon
-			SDL_SetWindowIcon(GameManager::GetInstance().GetWindow(), iconSurface);
+			SDL_SetWindowIcon(window, iconSurface);
 		}
 
 		// create a renderer with black background
-		GameManager::GetInstance().SetRenderer(SDL_CreateRenderer(GameManager::GetInstance().GetWindow(), -1, 0));
-		if (GameManager::GetInstance().GetRenderer())
+		renderer = SDL_CreateRenderer(window, -1, 0);
+		if (renderer)
 		{
-			SDL_SetRenderDrawColor(GameManager::GetInstance().GetRenderer(), 0, 0, 0, 255);
+			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 			std::cout << "Renderer created!" << std::endl;
 		}
 
@@ -75,7 +84,7 @@ void Game::Init(const char* title, int xPos, int yPos)
 void Game::SetUpLevel()
 {
 	// add transform component for position and scale
-	player.AddComponent<TransformComponent>(960.0f, 1000.0f);
+	player.AddComponent<TransformComponent>(960.0f, 1000.0f, 80.0f, 80.0f);
 
 	// add sprite component for rendering sprites
 	player.AddComponent<SpriteComponent>("Assets/Player.png");
@@ -86,6 +95,10 @@ void Game::SetUpLevel()
 	// add player input component to allow the player to receive input
 	player.AddComponent<PlayerInputComponent>();
 
+	player.AddComponent<ColliderComponent>("Player");
+
+	player.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
+
 	for (int y = 0; y < 3; y++)
 	{
 		for (int x = 0; x < 7; x++)
@@ -95,21 +108,34 @@ void Game::SetUpLevel()
 			enemies.push_back(&enemy);
 
 			// Add a TransformComponent to the enemy entity
-			enemy.AddComponent<TransformComponent>(100.0f + x * 120.0f, 200.0f + y * 120.0f);
+			enemy.AddComponent<TransformComponent>(100.0f + x * 120.0f, 200.0f + y * 120.0f, 80.0f, 80.0f);
 
 			enemy.AddComponent<SpriteComponent>("Assets/Enemy1.png");
 
 			enemy.AddComponent<StatComponent>(1, 5);
+
+			enemy.AddComponent<ColliderComponent>("Enemy");
+
+			enemy.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
+
+			enemy.AddComponent<EnemyAIComponent>();
 		}
 	}
-
-	std::cout << enemies[0]->GetComponent<TransformComponent>().Position.y;
 
 	scoreText = TextManager::AddText(200, 70, std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
 
 	healthText = TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player.GetComponent<StatComponent>().Health())).c_str());
 
+	//Map::LoadMap("Assets/test.map", 30, 30);
+	
 	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
+}
+
+void Game::AddTile(int id, int x, int y)
+{
+	auto& tile(eManager.AddEntity());
+
+	tile.AddComponent<TileComponent>(x, y, 64, 64, id);
 }
 
 void Game::HandleEvents()
@@ -142,6 +168,7 @@ void Game::HandleEvents()
 		switch (GameManager::GetInstance().GetState())
 		{
 		case GameManager::GameState::Menu:
+		case GameManager::GameState::Option:
 			menu.Input();
 			break;
 		case GameManager::GameState::Playing:
@@ -161,43 +188,15 @@ void Game::Update()
 	case GameManager::GameState::Playing:
 		eManager.Update();
 		eManager.Refresh();
-		//// enemy update function
-		//for (size_t i = 0; i < enemies.size(); i++)
-		//{
-		//	enemies[i]->Update();
 
-		//	// check if enemy bullet hit player
-		//	if (enemies[i]->isShotActive)
-		//	{
-		//		if (CollisionManager::CheckCollision(player->destRect, enemies[i]->bulletDestRect))
-		//		{
-		//			if (player->TakeDamage())
-		//			{
-		//				GameManager::GetInstance().SetActiveGame(false);
-		//				std::cout << "Game Over!" << std::endl;
-		//			}
-		//			healthText->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->health)).c_str());
-		//			enemies[i]->isShotActive = false;
-		//		}
-		//	}
+		// check for all collisions against the player
+		for (auto c : colliders)
+		{
+			if (CollisionManager::CheckCollision(player.GetComponent<ColliderComponent>(), *c))
+			{
 
-		//	// check if player bullet hit enemy
-		//	if (player->isShotActive)
-		//	{
-		//		if (CollisionManager::CheckCollision(player->bulletDestRect, enemies[i]->destRect))
-		//		{
-		//			if (enemies[i]->TakeDamage())
-		//			{
-		//				GameManager::GetInstance().SetScore(GameManager::GetInstance().GetScore() + enemies[i]->baseScore);
-		//				enemies.erase(enemies.begin() + i);
-		//				scoreText->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
-		//			}
-		//			player->isShotActive = false;
-		//		}
-		//	}
-		//}
-
-		// Tempory: close window after all enemies died
+			}
+		}
 		break;
 	case GameManager::GameState::GameOver:
 		break;
@@ -208,7 +207,7 @@ void Game::Update()
 
 void Game::Render()
 {
-	SDL_RenderClear(GameManager::GetInstance().GetRenderer());
+	SDL_RenderClear(renderer);
 
 	switch (GameManager::GetInstance().GetState())
 	{
@@ -227,14 +226,14 @@ void Game::Render()
 	// render text
 	TextManager::Render();
 
-	SDL_RenderPresent(GameManager::GetInstance().GetRenderer());
+	SDL_RenderPresent(renderer);
 }
 
 // destroyed created instances and close window
 void Game::Clean()
 {
-	SDL_DestroyWindow(GameManager::GetInstance().GetWindow());
-	SDL_DestroyRenderer(GameManager::GetInstance().GetRenderer());
+	SDL_DestroyWindow(window);
+	SDL_DestroyRenderer(renderer);
 	LevelManager::Clean();
 	SDL_Quit();
 }

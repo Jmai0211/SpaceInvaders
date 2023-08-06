@@ -4,3 +4,6 @@
 #include "SpriteComponent.h"
 #include "StatComponent.h"
 #include "PlayerInputComponent.h"
+#include "ColliderComponent.h"
+#include "TileComponent.h"
+#include "EnemyAIComponent.h"

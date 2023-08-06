@@ -3,6 +3,7 @@
 #include <istream>
 #include <iostream>
 #include <string>
+#include <Game.h>
 
 GameManager GameManager::instance;
 int GameManager::score = 0;
@@ -10,9 +11,6 @@ bool GameManager::activeGame = false;
 GameManager::GameState GameManager::state = GameManager::GameState::Menu;
 GameManager::Language GameManager::language = GameManager::Language::English;
 std::pair<int, int> GameManager::resolution = std::make_pair(1920, 1080);
-SDL_Window* GameManager::window = nullptr;
-SDL_Renderer* GameManager::renderer = nullptr;
-
 // return instance of game manager
 GameManager& GameManager::GetInstance()
 {
@@ -69,10 +67,9 @@ void GameManager::SetLanguage(Language _language)
     SaveSettings();
 }
 
-// update the game title
 void GameManager::SetWindowTitle(const char* _title)
 {
-	SDL_SetWindowTitle(window, _title);
+    SDL_SetWindowTitle(Game::window, _title);
 }
 
 // get current game resolution
@@ -85,33 +82,11 @@ std::pair<int, int> GameManager::GetResolution() const
 void GameManager::SetResolution(int width, int height)
 {
 	resolution = std::make_pair(width, height);
-	SDL_SetWindowSize(window, resolution.first, resolution.second);
+	SDL_SetWindowSize(Game::window, resolution.first, resolution.second);
 
-	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowPosition(Game::window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
 	SaveSettings();
-}
-
-// get window reference
-SDL_Window* GameManager::GetWindow() const
-{
-    return window;
-}
-
-// update window reference
-void GameManager::SetWindow(SDL_Window* _window)
-{
-    window = _window;
-}
-
-SDL_Renderer* GameManager::GetRenderer() const
-{
-    return renderer;
-}
-
-void GameManager::SetRenderer(SDL_Renderer* _renderer)
-{
-    renderer = _renderer;
 }
 
 // save game settings to a file

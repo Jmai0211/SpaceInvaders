@@ -6,6 +6,8 @@
 class SpriteComponent : public Component
 {
 public:
+
+	SDL_Rect destRect;
 	SpriteComponent() = default;
 	SpriteComponent(const char* path)
 	{
@@ -44,5 +46,4 @@ private:
 	TransformComponent* transform;
 	SDL_Texture* texture;
 	SDL_Rect srcRect;
-	SDL_Rect destRect;
 };

@@ -4,6 +4,8 @@
 #include <vector>
 #include "GameManager.h"
 
+class ColliderComponent;
+
 class Game
 {
 public:
@@ -18,5 +20,11 @@ public:
 	void Clean();
 
 	void SetUpLevel();
-private:
+
+	static void AddTile(int id, int x, int y);
+
+	static SDL_Renderer* renderer;
+	static SDL_Window* window;
+
+	static std::vector<ColliderComponent*> colliders;
 };

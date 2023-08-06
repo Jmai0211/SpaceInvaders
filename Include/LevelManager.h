@@ -4,6 +4,7 @@
 class LevelManager
 {
 public: 
+
 	static void Update();
 
 	static void Render();

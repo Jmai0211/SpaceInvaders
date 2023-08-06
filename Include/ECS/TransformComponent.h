@@ -2,6 +2,7 @@
 #include "Components.h"
 #include "Vector2D.h"
 #include <algorithm>
+#include "GameManager.h"
 
 class TransformComponent : public Component
 {
@@ -10,34 +11,35 @@ public:
 	Vector2D Size;
 	float Scale;
 
+	Vector2D defaultSize;
+
 	Vector2D Velocity;
-	int speed = 7;
+	float speed = 7.0f;
 
 	// default constructor
 	TransformComponent()
 	{
-		Position.x = 0.0f;
-		Position.y = 0.0f;
-		Size.x = 80.0f;
-		Size.y = 80.0f;
+		Position.Zero();
+		Size.Zero();
 		Scale = 1.0f;
 	}
 
 	// constructor with parameters
-	TransformComponent(float x, float y)
+	TransformComponent(float x, float y, float w, float h)
 	{
 		Position.x = x;
 		Position.y = y;
-		Size.x = 80.0f;
-		Size.y = 80.0f;
+		Size.x = w;
+		Size.y = h;
+		defaultSize.x = w;
+		defaultSize.y = h;
 		Scale = 1.0f;
 		Resize();
 	}
 
 	void Init() override
 	{
-		Velocity.x = 0;
-		Velocity.y = 0;
+		Velocity.Zero();
 	}
 
 	void Update() override
@@ -46,32 +48,17 @@ public:
 		if (Velocity.x != 0.0f && Velocity.y != 0.0f)
 		{
 			float length = std::sqrt(Velocity.x * Velocity.x + Velocity.y * Velocity.y);
-
 			Velocity.x /= length;
 			Velocity.y /= length;
 		}
 
 		// Update position based on scaled velocity
-		Position.x += Velocity.x * speed * Scale;
-		Position.y += Velocity.y * speed * Scale;
+		Position.x += Velocity.x * speed * (Size.x / defaultSize.x);
+		Position.y += Velocity.y * speed * (Size.y / defaultSize.y);
 
-		// Keep the player in the screen
-		if (Position.x < 0)
-		{
-			Position.x = 0;
-		}
-		else if (Position.x > GameManager::GetInstance().GetResolution().first - Size.x)
-		{
-			Position.x = GameManager::GetInstance().GetResolution().first - Size.x;
-		}
-		if (Position.y < 0)
-		{
-			Position.y = 0;
-		}
-		else if (Position.y > GameManager::GetInstance().GetResolution().second - Size.y)
-		{
-			Position.y = GameManager::GetInstance().GetResolution().second - Size.y;
-		}
+		// Round the position to the nearest integer
+		Position.x = round(Position.x);
+		Position.y = round(Position.y);
 	}
 
 	// calculate the size and scale of the entity based on the current resolution : reference resolution ratio
@@ -85,12 +72,12 @@ public:
 		float widthRatio = screenWidth / 1920.0f;
 		float heightRatio = screenHeight / 1080.0f;
 
-		Scale = std::min(widthRatio, heightRatio); // Scale the default size
+		float scale = std::min(widthRatio, heightRatio);
 
-		Size.x = Scale * 80.0f;
-		Size.y = Scale * 80.0f;;
+		Size.x = round(defaultSize.x * scale);
+		Size.y = round(defaultSize.y * scale);
 
-		Position.x = Position.x * widthRatio - (Size.x / 2);
-		Position.y = Position.y * heightRatio - (Size.y / 2);
+		Position.x = round(Position.x * scale - (Size.x / 2.0f));
+		Position.y = round(Position.y * scale - (Size.y / 2.0f));
 	}
 };

@@ -12,8 +12,7 @@ const char* languageText;
 // setup main menu
 void MainMenu::SetUpMenu()
 {
-	options = false;
-
+	GameManager::GetInstance().SetState(GameManager::GameState::Menu);
 	menuIndex = 1;
 	menuText.push_back(TextManager::AddText(960, 230, TextManager::GetLocalizedText("Space Invaders")));
 	menuText[0]->SetScale(2, 2);
@@ -28,12 +27,12 @@ void MainMenu::SetUpMenu()
 // setup options menu
 void MainMenu::SetUpOptions()
 {
+	GameManager::GetInstance().SetState(GameManager::GameState::Option);
 	UnsetMenu();
 
 	languageIndex = static_cast<int>(GameManager::GetInstance().GetLanguage());
 
 	optionIndex = 2;
-	options = true;
 
 	for (size_t i = 0; i < sizeof(resolutionTable) / sizeof(resolutionTable[0]); i++)
 	{
@@ -83,17 +82,19 @@ void MainMenu::UnsetMenu()
 void MainMenu::Input()
 {
 	// stop continuous input
-	if (SDL_GetTicks() - lastMenuChangeTime >= 200)
+	if (SDL_GetTicks() - lastMenuChangeTime >= 100)
 	{
-		if (!options)
+		switch (GameManager::GetInstance().GetState())
 		{
+		case GameManager::GameState::Menu:
 			// main menu input
 			MenuNavigation();
-		}
-		else
-		{
+			break;
+		case GameManager::GameState::Option:
 			// options menu input
 			OptionNavigation();
+		default:
+			break;
 		}
 	}
 }
