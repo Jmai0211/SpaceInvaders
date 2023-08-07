@@ -3,6 +3,7 @@
 #include "Vector2D.h"
 #include <algorithm>
 #include "GameManager.h"
+#include <cmath>
 
 class TransformComponent : public Component
 {
@@ -53,31 +54,45 @@ public:
 		}
 
 		// Update position based on scaled velocity
-		Position.x += Velocity.x * speed * (Size.x / defaultSize.x);
-		Position.y += Velocity.y * speed * (Size.y / defaultSize.y);
+		Position.x += Velocity.x * speed;
+		Position.y += Velocity.y * speed;
 
 		// Round the position to the nearest integer
-		Position.x = round(Position.x);
-		Position.y = round(Position.y);
+		Position.x = std::round(Position.x);
+		Position.y = std::round(Position.y);
 	}
 
-	// calculate the size and scale of the entity based on the current resolution : reference resolution ratio
 	void Resize()
 	{
 		// Calculate scale based on screen ratio
 		std::pair<int, int> resolution = GameManager::GetInstance().GetResolution();
-		int screenWidth = resolution.first;
-		int screenHeight = resolution.second;
+		float screenWidth = static_cast<float>(resolution.first);
+		float screenHeight = static_cast<float>(resolution.second);
 
 		float widthRatio = screenWidth / 1920.0f;
 		float heightRatio = screenHeight / 1080.0f;
 
-		float scale = std::min(widthRatio, heightRatio);
+		// sprites with perfect squares
+		if (defaultSize.x == defaultSize.y)
+		{
+			float scale = std::min(widthRatio, heightRatio);
+			Size.x = defaultSize.x * scale;
+			Size.y = defaultSize.y * scale;
+			Position.x = std::floor(Position.x * scale - (Size.x / 2.0f));
+			Position.y = std::floor(Position.y * scale - (Size.y / 2.0f));
+		}
+		else
+		{
+			// For non-square sprites, use the width and height ratios separately
+			Size.x = std::round(defaultSize.x * widthRatio);
+			Size.y = std::round(defaultSize.y * heightRatio);
+			Position.x = std::floor(Position.x * widthRatio - (Size.x / 2.0f));
+			Position.y = std::floor(Position.y * heightRatio - (Size.y / 2.0f));
+		}
+	}
 
-		Size.x = round(defaultSize.x * scale);
-		Size.y = round(defaultSize.y * scale);
-
-		Position.x = round(Position.x * scale - (Size.x / 2.0f));
-		Position.y = round(Position.y * scale - (Size.y / 2.0f));
+	double roundToDecimalPlaces(double value, int decimalPlaces) {
+		double factor = std::pow(10, decimalPlaces);
+		return std::round(value * factor) / factor;
 	}
 };

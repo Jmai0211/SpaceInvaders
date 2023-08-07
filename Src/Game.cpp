@@ -11,6 +11,9 @@
 #include "CollisionManager.h"
 #include "Map.h"
 
+SDL_Renderer* Game::renderer = nullptr;
+SDL_Window* Game::window = nullptr;
+
 Text* scoreText;
 Text* healthText;
 
@@ -24,8 +27,12 @@ std::vector<Entity*> enemies;
 
 std::vector<ColliderComponent*> Game::colliders;
 
-SDL_Renderer* Game::renderer = nullptr;
-SDL_Window* Game::window = nullptr;
+enum GroupLabels : std::size_t
+{
+	groupMap,
+	groupEnemy,
+	groupPlayer,
+};
 
 Game::Game()
 {
@@ -84,10 +91,10 @@ void Game::Init(const char* title, int xPos, int yPos)
 void Game::SetUpLevel()
 {
 	// add transform component for position and scale
-	player.AddComponent<TransformComponent>(960.0f, 1000.0f, 80.0f, 80.0f);
+	player.AddComponent<TransformComponent>(960.0f, 1000.0f, 60.0f, 80.0f);
 
 	// add sprite component for rendering sprites
-	player.AddComponent<SpriteComponent>("Assets/Player.png");
+	player.AddComponent<SpriteComponent>("Assets/Character.png", 4, 25, 4, 4, 200);
 
 	// add stat component for health and movement speed
 	player.AddComponent<StatComponent>(5, 7);
@@ -98,6 +105,8 @@ void Game::SetUpLevel()
 	player.AddComponent<ColliderComponent>("Player");
 
 	player.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
+
+	player.AddGroup(groupPlayer);
 
 	for (int y = 0; y < 3; y++)
 	{
@@ -119,6 +128,8 @@ void Game::SetUpLevel()
 			enemy.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
 
 			enemy.AddComponent<EnemyAIComponent>();
+
+			enemy.AddGroup(groupEnemy);
 		}
 	}
 
@@ -126,7 +137,7 @@ void Game::SetUpLevel()
 
 	healthText = TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player.GetComponent<StatComponent>().Health())).c_str());
 
-	//Map::LoadMap("Assets/test.map", 30, 30);
+	Map::LoadMap("Assets/test.map", 30, 30);
 	
 	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
 }
@@ -136,6 +147,8 @@ void Game::AddTile(int id, int x, int y)
 	auto& tile(eManager.AddEntity());
 
 	tile.AddComponent<TileComponent>(x, y, 64, 64, id);
+
+	tile.AddGroup(groupMap);
 }
 
 void Game::HandleEvents()
@@ -186,9 +199,11 @@ void Game::Update()
 	case GameManager::GameState::Menu:
 		break;
 	case GameManager::GameState::Playing:
+
 		eManager.Update();
 		eManager.Refresh();
 
+		std::cout << enemies[0]->GetComponent<TransformComponent>().Position.x - enemies[1]->GetComponent<TransformComponent>().Position.x << std::endl;
 		// check for all collisions against the player
 		for (auto c : colliders)
 		{
@@ -209,12 +224,28 @@ void Game::Render()
 {
 	SDL_RenderClear(renderer);
 
+	auto& tilesGroup(eManager.GetGroup(groupMap));
+	auto& enemyGroup(eManager.GetGroup(groupEnemy));
+	auto& playerGroup(eManager.GetGroup(groupPlayer));
+
 	switch (GameManager::GetInstance().GetState())
 	{
 	case GameManager::GameState::Menu:
 		break;
 	case GameManager::GameState::Playing:
-		eManager.Render();
+		for (auto& t : tilesGroup)
+		{
+			t->Render();
+		}
+		for (auto& e : enemyGroup)
+		{
+			e->Render();
+		}
+		for (auto& p : playerGroup)
+		{
+			p->Render();
+		}
+
 		LevelManager::Render();
 		break;
 	case GameManager::GameState::GameOver:

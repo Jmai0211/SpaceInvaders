@@ -12,7 +12,7 @@ public:
 
 	void Update() override
 	{
-		if (transform->Position.x < 0 || transform->Position.x + transform->Size.x >= GameManager::GetInstance().GetResolution().first)
+		if (transform->Position.x < 0 || transform->Position.x + transform->Size.x > GameManager::GetInstance().GetResolution().first)
 		{
 			movementDirection *= -1.0f;
 			transform->Velocity.x = movementDirection;

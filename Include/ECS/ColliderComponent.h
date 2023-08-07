@@ -32,6 +32,11 @@ public:
 		transform = &entity->GetComponent<TransformComponent>();
 
 		Game::colliders.push_back(this);
+
+		srcRect.x = 0;
+		srcRect.y = 0;
+		srcRect.w = 80;
+		srcRect.h = 80;
 	}
 
 	void Update() override
@@ -41,17 +46,17 @@ public:
 		collider.w = static_cast<int>(transform->Size.x);
 		collider.h = static_cast<int>(transform->Size.y);
 
-		destRect.x = collider.x;
-		destRect.y = collider.y;
-		destRect.w = collider.w;
-		destRect.h = collider.h;
+		destRect.x = transform->Position.x;
+		destRect.y = transform->Position.y;
+		destRect.w = transform->Size.x;
+		destRect.h = transform->Size.y;
 	}
 
 	void Render() override
 	{
 		if (collisionVisible)
 		{
-			TextureManager::Render(texture, destRect);
+			TextureManager::Render(texture, srcRect, destRect);
 		}
 	}
 
@@ -62,6 +67,7 @@ public:
 
 private:
 	SDL_Texture* texture;
-	SDL_Rect destRect;
+	SDL_FRect destRect;
+	SDL_Rect srcRect;
 	bool collisionVisible = false;
 };
