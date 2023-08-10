@@ -4,6 +4,7 @@
 class EnemyAIComponent : public Component
 {
 public:
+	int health = 1;
 	void Init() override
 	{
 		transform = &entity->GetComponent<TransformComponent>();
@@ -14,7 +15,7 @@ public:
 	{
 		if (transform->Position.x < 0 || transform->Position.x + transform->Size.x > GameManager::GetInstance().GetResolution().first)
 		{
-			movementDirection *= -1.0f;
+			movementDirection *= -1;
 			transform->Velocity.x = movementDirection;
 		}
 	}
@@ -22,7 +23,7 @@ public:
 private:
 	TransformComponent* transform;
 
-	float movementDirection = 1.0f;
+	int movementDirection = 1;
 
 	// get random chance for shooting
 	bool RandomChance(int probability)

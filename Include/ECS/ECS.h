@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <bitset>
 #include <array>
+#include <functional>
 
 class Component;
 class Entity;
@@ -21,6 +22,7 @@ inline ComponentID GetNewComponentTypeID()
 
 template <typename T> inline ComponentID GetComponentTypeID() noexcept
 {
+	static_assert (std::is_base_of<Component, T>::value, "");
 	static ComponentID typeID = GetNewComponentTypeID();
 	return typeID;
 }
@@ -47,7 +49,22 @@ public:
 class Entity
 {
 public:
-	Entity(EntityManager& mManager) : manager(mManager) {}
+	Entity(EntityManager& mManager) : manager(mManager) 
+	{
+		// Initialize componentArray with nullptr values
+		for (std::size_t i = 0; i < maxComponents; ++i)
+		{
+			componentArray[i] = nullptr;
+		}
+	}
+
+	~Entity()
+	{
+		if (destroyEnemyCallback)
+		{
+			destroyEnemyCallback(this);
+		}
+	}
 
 	void Update()
 	{
@@ -57,6 +74,12 @@ public:
 	void Render()
 	{
 		for (auto& c : components) c->Render();
+	}
+
+	// call back used to remove enemy pointer from game.h when the enemy is destroyed
+	void SetDestroyEnemyCallback(std::function<void(Entity*)> callback)
+	{
+		destroyEnemyCallback = callback;
 	}
 
 	bool IsActive() const { return active; }
@@ -113,11 +136,15 @@ private:
 	ComponentArray componentArray;
 	ComponentBitSet componentBitSet;
 	GroupBitSet groupBitSet;
+
+	std::function<void(Entity*)> destroyEnemyCallback;
 };
 
 class EntityManager
 {
 public:
+	static EntityManager& GetInstance();
+
 	void Update()
 	{
 		for (auto& e : entityArray) e->Update();
@@ -163,7 +190,7 @@ public:
 
 	Entity& AddEntity()
 	{
-		Entity* e = new Entity(*this);
+		Entity* e = new Entity(instance);
 		std::unique_ptr<Entity> uPtr{ e };
 		entityArray.emplace_back(std::move(uPtr));
 
@@ -171,6 +198,7 @@ public:
 	}
 
 private:
+	static EntityManager instance;
 	std::vector<std::unique_ptr<Entity>> entityArray;
 	std::array<std::vector<Entity*>, maxGroups> groupedEntities;
 };

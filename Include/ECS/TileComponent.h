@@ -1,71 +1,46 @@
 #pragma once
 #include "ECS.h"
 #include "Components.h"
+#include <string>
+#include "AssetManager.h"
+#include "Game.h"
 
 class TileComponent : public Component
 {
 public:
-	TransformComponent* transform;
-	SpriteComponent* sprite;
-
-	SDL_Rect tileRect;
-	int tileID;
-	char* path;
+	SDL_Texture* texture;
+	SDL_Rect srcRect;
+	SDL_Rect destRect;
 
 	TileComponent() = default;
 
-	TileComponent(int x, int y, int w, int h, int id)
+	TileComponent(int srcX, int srcY, int xPos, int yPos, std::string id)
 	{
-		tileRect.x = x;
-		tileRect.y = y;
-		tileRect.w = w;
-		tileRect.h = h;
-		tileID = id;
+		srcRect.x = srcX;
+		srcRect.y = srcY;
+		srcRect.w = 64;
+		srcRect.h = 64;
 
-		switch (tileID)
-		{
-		// add more sprites as needed and assign it to one integer value
-		case 0:
-			path = "Assets/CollisionBox.png";
-			break;
-		case 121:
-			path = "Assets/Overworld-121.png";
-			break;
-		case 122:
-			path = "Assets/Overworld-122.png";
-			break;
-		case 123:
-			path = "Assets/Overworld-123.png";
-			break;
-		case 161:
-			path = "Assets/Overworld-161.png";
-			break;
-		case 162:
-			path = "Assets/Overworld-162.png";
-			break;
-		case 163:
-			path = "Assets/Overworld-163.png";
-			break;
-		case 201:
-			path = "Assets/Overworld-201.png";
-			break;
-		case 202:
-			path = "Assets/Overworld-202.png";
-			break;
-		case 203:
-			path = "Assets/Overworld-203.png";
-			break;
-		default:
-			break;
-		}
+		// Calculate scale based on screen ratio
+		std::pair<int, int> resolution = GameManager::GetInstance().GetResolution();
+		int screenWidth = resolution.first;
+		int screenHeight = resolution.second;
+
+		float widthRatio = static_cast<float>(screenWidth) / 1920.0f;
+		float heightRatio = static_cast<float>(screenHeight) / 1080.0f;
+
+		float scale = std::min(widthRatio, heightRatio);
+
+		destRect.x = static_cast<int>(std::round(xPos * scale));
+		destRect.y = static_cast<int>(std::round(yPos * scale));
+		destRect.w = static_cast<int>(std::round(64 * scale));
+		destRect.h = static_cast<int>(std::round(64 * scale));
+		
+		texture = Game::aManager->GetTexture(id);
 	}
 
-	void Init() override
+	void Render() override
 	{
-		entity->AddComponent<TransformComponent>((float)tileRect.x, (float)tileRect.y, (float)tileRect.w, (float)tileRect.w);
-		transform = &entity->GetComponent<TransformComponent>();
-
-		entity->AddComponent<SpriteComponent>(path);
-		sprite = &entity->GetComponent<SpriteComponent>();
+		TextureManager::Render(texture, srcRect, destRect);
 	}
 };

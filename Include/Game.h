@@ -2,13 +2,23 @@
 #include "SDL.h"
 #include <iostream>
 #include <vector>
-#include "GameManager.h"
 
 class ColliderComponent;
+class GameManager;
+class AssetManager;
+class Entity;
 
 class Game
 {
 public:
+	enum GroupLabels : std::size_t
+	{
+		groupMap,
+		groupEnemy,
+		groupPlayer,
+		groupProjectile,
+	};
+
 	Game();
 	~Game();
 
@@ -21,10 +31,17 @@ public:
 
 	void SetUpLevel();
 
-	static void AddTile(int id, int x, int y);
+	static void AddTile(int srcX, int srcY, int xPos, int yPos);
+
+	static void RemoveCollider(ColliderComponent* collider);
 
 	static SDL_Renderer* renderer;
 	static SDL_Window* window;
 
 	static std::vector<ColliderComponent*> colliders;
+	static AssetManager* aManager;
+
+private:
+	void SpawnEnemy();
+	void RemoveEnemy(Entity* enemy);
 };

@@ -2,47 +2,64 @@
 #include "Components.h"
 #include "SDL.h"
 #include "TextureManager.h"
+#include "Animation.h"
+#include <map>
+#include "AssetManager.h"
+#include "Game.h"
 
 class SpriteComponent : public Component
 {
 public:
+	int animIndex = 0;
+
+	std::map<const char*, Animation> animations;
+
 	SpriteComponent() = default;
 
-	SpriteComponent(const char* path)
+	SpriteComponent(std::string id)
 	{
-		SetTexture(path);
+		SetTexture(id);
+		srcRect.x = 0;
+		srcRect.y = 0;
+	}
+
+	SpriteComponent(std::string id, SDL_Rect _srcRect)
+	{
+		SetTexture(id);
+		srcRect = _srcRect;
 	}
 
 	// srcX and src Y are the starting position of the texture in a sprite sheet
 	// if your character starts at (0,0), pass in 0 for both srcX and srcY
 	// spacing represents the spacing between each animation frame
 	// if there are no spacing between each one, you can leave it as 0
-	SpriteComponent(const char* path, int srcX, int srcY, int _frames, int _spacing, int _speed)
+	SpriteComponent(std::string id, bool isAnimated)
 	{
-		animated = true;
-		frames = _frames;
-		speed = _speed;
-		animationStart.x = static_cast<float>(srcX);
-		animationStart.y = static_cast<float>(srcY);
-		spacing = _spacing;
-		SetTexture(path);
+		animated = isAnimated;
+
+		Animation walkDown = Animation(0, 4, 25, 4, 4, 200);
+		Animation walkRight = Animation(0, 8, 151, 4, 4, 200);
+
+		Animation walkUp = Animation(0, 0, 275, 4, 4, 200);
+
+		Animation walkLeft = Animation(0, 4, 407, 4, 4, 200);
+		animations.emplace("Walk_Down", walkDown);
+		animations.emplace("Walk_Right", walkRight);
+		animations.emplace("Walk_Up", walkUp);
+		animations.emplace("Walk_Left", walkLeft);
+
+		Play("Walk_Right");
+		SetTexture(id);
 	}
 
-	~SpriteComponent()
+	void SetTexture(std::string id)
 	{
-		SDL_DestroyTexture(texture);
-	}
-
-	void SetTexture(const char* path)
-	{
-		texture = TextureManager::LoadTexture(path);
+		texture = Game::aManager->GetTexture(id);
 	}
 
 	void Init() override
 	{
 		transform = &entity->GetComponent<TransformComponent>();
-		srcRect.x = 0;
-		srcRect.y = 0;
 
 		srcRect.w = static_cast<int>(transform->defaultSize.x);
 		srcRect.h = static_cast<int>(transform->defaultSize.y);
@@ -53,7 +70,7 @@ public:
 		if (animated)
 		{
 			srcRect.x = static_cast<int>((srcRect.w + spacing) * ((SDL_GetTicks() / speed) % frames));
-			srcRect.y = static_cast<int>(animationStart.y);
+			srcRect.y = animIndex * transform->Size.y + animationStart.y;
 		}	
 
 		destRect.x = transform->Position.x;
@@ -67,11 +84,20 @@ public:
 		TextureManager::Render(texture, srcRect, destRect);
 	}
 
+	void Play(const char* animName)
+	{
+		frames = animations[animName].frames;
+		animIndex = animations[animName].index;
+		animationStart = animations[animName].animationStart;
+		spacing = animations[animName].spacing;
+		speed = animations[animName].speed;
+	}
+
 private:
 	TransformComponent* transform;
 	SDL_Texture* texture;
 	SDL_Rect srcRect;
-	SDL_FRect destRect;
+	SDL_Rect destRect;
 	Vector2D animationStart;
 
 	bool animated = false;
