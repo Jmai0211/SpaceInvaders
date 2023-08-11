@@ -22,7 +22,7 @@ Text* healthText;
 MainMenu menu;
 Map* map;
 
-EntityManager& eManager = EntityManager::GetInstance();
+EntityManager eManager;
 
 Entity* player;
 std::vector<Entity*> enemies;
@@ -111,7 +111,7 @@ void Game::SetUpLevel()
 
 	player->GetComponent<ColliderComponent>().SetCollisionVisibility(true);
 
-	player->AddGroup(groupPlayer);
+	//player->AddGroup(groupPlayer);
 
 	SpawnEnemy();
 
@@ -130,7 +130,7 @@ void Game::AddTile(int srcX, int srcY, int xPos, int yPos)
 
 	tile.AddComponent<TileComponent>(srcX, srcY, xPos, yPos, "Map");
 
-	tile.AddGroup(groupMap);
+	//tile.AddGroup(groupMap);
 }
 
 void Game::HandleEvents()
@@ -246,22 +246,24 @@ void Game::Render()
 	case GameManager::GameState::Menu:
 		break;
 	case GameManager::GameState::Playing:
-		for (auto& t : tilesGroup)
-		{
-			t->Render();
-		}
-		for (auto& e : enemyGroup)
-		{
-			e->Render();
-		}
-		for (auto& p : playerGroup)
-		{
-			p->Render();
-		}
-		for (auto & p : projectileGroup)
-		{
-			p->Render();
-		}
+		//for (auto& t : tilesGroup)
+		//{
+		//	t->Render();
+		//}
+		//for (auto& e : enemyGroup)
+		//{
+		//	e->Render();
+		//}
+		//for (auto& p : playerGroup)
+		//{
+		//	p->Render();
+		//}
+		//for (auto & p : projectileGroup)
+		//{
+		//	p->Render();
+		//}
+
+		eManager.Render();
 
 		LevelManager::Render();
 		break;
@@ -324,7 +326,7 @@ void Game::SpawnEnemy()
 
 			enemy.AddComponent<EnemyAIComponent>();
 
-			enemy.AddGroup(groupEnemy);
+			//enemy.AddGroup(groupEnemy);
 		}
 	}
 }

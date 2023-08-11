@@ -20,6 +20,6 @@ public:
 	SDL_Texture* GetTexture(std::string id);
 
 private:
-	std::shared_ptr<EntityManager> eManager;
+	EntityManager* eManager;
 	std::map<std::string, SDL_Texture*> textures;
 };

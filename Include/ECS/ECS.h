@@ -143,8 +143,6 @@ private:
 class EntityManager
 {
 public:
-	static EntityManager& GetInstance();
-
 	void Update()
 	{
 		for (auto& e : entityArray) e->Update();
@@ -190,7 +188,7 @@ public:
 
 	Entity& AddEntity()
 	{
-		Entity* e = new Entity(instance);
+		Entity* e = new Entity(*this);
 		std::unique_ptr<Entity> uPtr{ e };
 		entityArray.emplace_back(std::move(uPtr));
 
@@ -198,7 +196,6 @@ public:
 	}
 
 private:
-	static EntityManager instance;
 	std::vector<std::unique_ptr<Entity>> entityArray;
 	std::array<std::vector<Entity*>, maxGroups> groupedEntities;
 };
