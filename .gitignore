@@ -23,7 +23,6 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # ignore the build directory.
 /build
