@@ -167,6 +167,7 @@ void Game::HandleEvents()
 			menu.Input();
 			break;
 		case GameManager::GameState::Playing:
+			player->GetComponent<PlayerComponent>().Input();
 			break;
 		default:
 			break;
@@ -299,9 +300,9 @@ void Game::RemoveCollider(ColliderComponent* collider)
 
 void Game::SpawnEnemy()
 {
-	for (int y = 0; y < 0; y++)
+	for (int y = 0; y < 1; y++)
 	{
-		for (int x = 0; x < 0; x++)
+		for (int x = 0; x < 1; x++)
 		{
 			// Create a new enemy entity and store a reference to it in the vector
 			Entity& enemy = eManager.AddEntity();
@@ -337,5 +338,12 @@ void Game::RemoveEnemy(Entity* enemy)
 	if (it != enemies.end())
 	{
 		enemies.erase(it);
+	}
+
+	std::cout << enemies.size() << std::endl;
+
+	if (enemies.size() == 0)
+	{
+		SpawnEnemy();
 	}
 }

@@ -16,6 +16,11 @@ public:
 
 	void Update() override
 	{
+
+	}
+
+	void Input()
+	{
 		//// Player Y movement, uncomment if need to enable
 		//if (InputManager::GetKeyDown(InputManager::Action::UpMovement) && transform->Position.y >= 0)
 		//{
@@ -40,7 +45,7 @@ public:
 			transform->Velocity.x = -1;
 			entity->GetComponent<SpriteComponent>().Play("Walk_Left");
 		}
-		else if (InputManager::GetKeyDown(InputManager::Action::RightMovement) 
+		else if (InputManager::GetKeyDown(InputManager::Action::RightMovement)
 			&& transform->Position.x <= GameManager::GetInstance().GetResolution().first - transform->Size.x)
 		{
 			transform->Velocity.x = 1;
