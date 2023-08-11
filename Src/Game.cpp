@@ -88,7 +88,7 @@ void Game::SetUpLevel()
 {
 	aManager = new AssetManager(&eManager);
 	// load game textures
-	//aManager->AddTexture("Map", "Assets/Overworld.png");
+	aManager->AddTexture("Map", "Assets/Overworld.png");
 
 	aManager->AddTexture("Player", "Assets/Player.png");
 
@@ -111,7 +111,7 @@ void Game::SetUpLevel()
 
 	player->GetComponent<ColliderComponent>().SetCollisionVisibility(true);
 
-	//player->AddGroup(groupPlayer);
+	player->AddGroup(groupPlayer);
 
 	SpawnEnemy();
 
@@ -119,7 +119,7 @@ void Game::SetUpLevel()
 
 	healthText = TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
 
-	//Map::LoadMap("Assets/test.map", 30, 30);
+	Map::LoadMap("Assets/test.map", 30, 30);
 	
 	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
 }
@@ -130,7 +130,7 @@ void Game::AddTile(int srcX, int srcY, int xPos, int yPos)
 
 	tile.AddComponent<TileComponent>(srcX, srcY, xPos, yPos, "Map");
 
-	//tile.AddGroup(groupMap);
+	tile.AddGroup(groupMap);
 }
 
 void Game::HandleEvents()
@@ -184,6 +184,13 @@ void Game::Update()
 	case GameManager::GameState::Playing:
 		eManager.Update();
 		eManager.Refresh();
+
+		if (enemies.size() == 0)
+		{
+			std::cout << "Spawn!" << std::endl;
+			SpawnEnemy();
+		}
+
 		// check for all collisions against the player
 		for (auto c : colliders)
 		{
@@ -247,24 +254,22 @@ void Game::Render()
 	case GameManager::GameState::Menu:
 		break;
 	case GameManager::GameState::Playing:
-		//for (auto& t : tilesGroup)
-		//{
-		//	t->Render();
-		//}
-		//for (auto& e : enemyGroup)
-		//{
-		//	e->Render();
-		//}
-		//for (auto& p : playerGroup)
-		//{
-		//	p->Render();
-		//}
-		//for (auto & p : projectileGroup)
-		//{
-		//	p->Render();
-		//}
-
-		eManager.Render();
+		for (auto& t : tilesGroup)
+		{
+			t->Render();
+		}
+		for (auto& e : enemyGroup)
+		{
+			e->Render();
+		}
+		for (auto& p : playerGroup)
+		{
+			p->Render();
+		}
+		for (auto & p : projectileGroup)
+		{
+			p->Render();
+		}
 
 		LevelManager::Render();
 		break;
@@ -327,7 +332,7 @@ void Game::SpawnEnemy()
 
 			enemy.AddComponent<EnemyAIComponent>();
 
-			//enemy.AddGroup(groupEnemy);
+			enemy.AddGroup(groupEnemy);
 		}
 	}
 }
@@ -338,12 +343,5 @@ void Game::RemoveEnemy(Entity* enemy)
 	if (it != enemies.end())
 	{
 		enemies.erase(it);
-	}
-
-	std::cout << enemies.size() << std::endl;
-
-	if (enemies.size() == 0)
-	{
-		SpawnEnemy();
 	}
 }

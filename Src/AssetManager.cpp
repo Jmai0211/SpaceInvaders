@@ -19,7 +19,7 @@ void AssetManager::CreateProjectile(Vector2D position, int direction, int speed,
 	projectile.GetComponent<ColliderComponent>().SetDestroyCallback([this](ColliderComponent* collider) {
 		Game::RemoveCollider(collider);
 		});
-	//projectile.AddGroup(Game::groupProjectile);
+	projectile.AddGroup(Game::groupProjectile);
 }
 
 void AssetManager::AddTexture(std::string id, const char* path)

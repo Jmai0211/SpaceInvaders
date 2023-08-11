@@ -11,9 +11,10 @@ set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Assets")
 # Add all the source files to the executable (for building the exe)
 file(GLOB_RECURSE SOURCE_FILES "${SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "${INCLUDE_DIR}/*.h")
-file(GLOB_RECURSE ECS_FILES "${ECS_DIR}/*.h")
+file(GLOB_RECURSE ECS_HEADER "${ECS_DIR}/*.h")
+file(GLOB_RECURSE ECS_CPP "${ECS_DIR}/*.cpp")
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${ECS_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${ECS_HEADER} ${ECS_CPP})
 
 # Include directories for the executable target
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -26,7 +27,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # Organize source files into virtual folders in the IDE solution
 source_group("Source Files" FILES ${SOURCE_FILES})
 source_group("Header Files" FILES ${HEADER_FILES})
-source_group("ECS" FILES ${ECS_FILES})
+source_group("ECS" FILES ${ECS_HEADER} files ${ECS_CPP})
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
