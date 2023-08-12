@@ -12,14 +12,10 @@ public:
 	void Init() override
 	{
 		transform = &entity->GetComponent<TransformComponent>();
+		transform->speed = 6;
 	}
 
 	void Update() override
-	{
-
-	}
-
-	void Input()
 	{
 		//// Player Y movement, uncomment if need to enable
 		//if (InputManager::GetKeyDown(InputManager::Action::UpMovement) && transform->Position.y >= 0)
@@ -57,9 +53,9 @@ public:
 		}
 
 		// player shoot function
-		if (InputManager::GetKeyDown(InputManager::Action::Shoot) && SDL_GetTicks() - lastFireTime >= 500)
+		if (InputManager::GetKeyDown(InputManager::Action::Shoot) && SDL_GetTicks() - lastFireTime >= 300)
 		{
-			Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, 5);
+			Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, bulletSpeed);
 			lastFireTime = SDL_GetTicks();
 		}
 	}
@@ -69,5 +65,6 @@ public:
 
 private:
 	int health;
+	int bulletSpeed = 8;
 	Uint32 lastFireTime = 0;
 };

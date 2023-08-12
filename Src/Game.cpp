@@ -22,8 +22,7 @@ Text* highScoreText;
 
 MainMenu menu;
 Map* map;
-
-EntityManager eManager;
+EntityManager& eManager = EntityManager::GetInstance();
 
 Entity* player;
 std::vector<Entity*> enemies;
@@ -87,7 +86,7 @@ void Game::Init(const char* title, int xPos, int yPos)
 
 void Game::SetUpLevel()
 {
-	aManager = new AssetManager(&eManager);
+	aManager = new AssetManager();
 	// load game textures
 	//aManager->AddTexture("Map", "Assets/Overworld.png");
 
@@ -96,6 +95,10 @@ void Game::SetUpLevel()
 	aManager->AddTexture("Enemy", "Assets/Enemy1.png");
 
 	aManager->AddTexture("Bullet", "Assets/bullet.png");
+
+	aManager->AddTexture("LeftArrow", "Assets/LeftArrow.png");
+
+	aManager->AddTexture("RightArrow", "Assets/RightArrow.png");
 
 	player = &eManager.AddEntity();
 
@@ -109,8 +112,6 @@ void Game::SetUpLevel()
 	player->AddComponent<PlayerComponent>(5);
 
 	player->AddComponent<ColliderComponent>("Player");
-
-	player->GetComponent<ColliderComponent>().SetCollisionVisibility(true);
 
 	player->AddGroup(groupPlayer);
 
@@ -170,11 +171,6 @@ void Game::HandleEvents()
 			menu.Input();
 			break;
 		case GameManager::GameState::Playing:
-			player->GetComponent<PlayerComponent>().Input();
-			for (auto e : enemies)
-			{
-				e->GetComponent<EnemyAIComponent>().Input();
-			}
 			break;
 		default:
 			break;
@@ -189,6 +185,7 @@ void Game::Update()
 	case GameManager::GameState::Menu:
 		break;
 	case GameManager::GameState::Playing:
+		eManager.ProcessEntityAdditions();
 		eManager.Update();
 		eManager.Refresh();
 
@@ -339,8 +336,6 @@ void Game::SpawnEnemy()
 
 			enemy.AddComponent<ColliderComponent>("Enemy");
 
-			enemy.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
-
 			enemy.GetComponent<ColliderComponent>().SetDestroyCallback([this](ColliderComponent* collider) {
 				RemoveCollider(collider);
 				});
@@ -349,7 +344,7 @@ void Game::SpawnEnemy()
 				RemoveEnemy(enemy);
 				});
 
-			enemy.AddComponent<EnemyAIComponent>();
+			enemy.AddComponent<EnemyAIComponent>(1 + static_cast<int>(LevelManager::GetDifficulty() / 5), 3 + LevelManager::GetDifficulty());
 
 			enemy.AddGroup(groupEnemy);
 		}
@@ -362,5 +357,13 @@ void Game::RemoveEnemy(Entity* enemy)
 	if (it != enemies.end())
 	{
 		enemies.erase(it);
+	}
+
+	if (enemies.empty())
+	{
+		LevelManager::SetDifficulty(LevelManager::GetDifficulty() + 1);
+		EntityManager::GetInstance().QueueEntityToAdd([this]() {
+			SpawnEnemy();
+		});
 	}
 }

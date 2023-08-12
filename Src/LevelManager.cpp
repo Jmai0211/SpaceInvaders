@@ -1,5 +1,7 @@
 #include "LevelManager.h"
 
+int LevelManager::difficulty = 1;
+
 void LevelManager::Update()
 {
 }
@@ -14,4 +16,14 @@ void LevelManager::Render()
 void LevelManager::Clean()
 {
 
+}
+
+int LevelManager::GetDifficulty()
+{
+	return difficulty;
+}
+
+void LevelManager::SetDifficulty(int _difficulty)
+{
+	difficulty = _difficulty;
 }

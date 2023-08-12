@@ -3,5 +3,5 @@
 void Entity::AddGroup(Group mGroup)
 {
 	groupBitSet[mGroup] = true;
-	manager.AddToGroup(this, mGroup);
+	EntityManager::GetInstance().AddToGroup(this, mGroup);
 }

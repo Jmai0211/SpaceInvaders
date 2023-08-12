@@ -4,13 +4,21 @@
 class EnemyAIComponent : public Component
 {
 public:
-	int health = 1;
+	int health;
+	int bulletSpeed;
+
+	EnemyAIComponent(int _health, int _bulletSpeed)
+	{
+		health = _health;
+		bulletSpeed = _bulletSpeed;
+	}
+
 	void Init() override
 	{
 		transform = &entity->GetComponent<TransformComponent>();
 		transform->Velocity.x = movementDirection;
 
-		coolDown = 100;
+		coolDown = rand() % 100 + 100;
 		
 		transform->speed = 4;
 	}
@@ -27,15 +35,19 @@ public:
 		{
 			coolDown--;
 		}
+		else
+		{
+			Shoot();
+		}
 	}
 
-	void Input()
+	void Shoot()
 	{
 		if (coolDown <= 0)
 		{
 			if (RandomChance(30))
 			{
-				Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), -1, 5);
+				Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), -1, bulletSpeed);
 			}
 			coolDown = rand() % 100 + 100;
 		}

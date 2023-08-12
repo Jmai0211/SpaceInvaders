@@ -3,6 +3,8 @@
 #include "Game.h"
 #include <string>
 #include "CommonStructs.h"
+#include "TextureManager.h"
+#include "AssetManager.h"
 
 Game* MainMenu::game;
 Uint32 lastMenuChangeTime = 0;

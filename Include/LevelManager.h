@@ -11,6 +11,9 @@ public:
 
 	static void Clean();
 
+	static int GetDifficulty();
+	static void SetDifficulty(int _difficulty);
+
 private:
-	int difficulty = -1;
+	static int difficulty;
 };

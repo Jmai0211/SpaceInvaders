@@ -6,6 +6,7 @@
 #include <bitset>
 #include <array>
 #include <functional>
+#include "GameManager.h"
 
 class Component;
 class Entity;
@@ -49,7 +50,7 @@ public:
 class Entity
 {
 public:
-	Entity(EntityManager& mManager) : manager(mManager) 
+	Entity() 
 	{
 		// Initialize componentArray with nullptr values
 		for (std::size_t i = 0; i < maxComponents; ++i)
@@ -128,8 +129,6 @@ public:
 	}
 
 private:
-	EntityManager& manager;
-
 	bool active = true;
 	std::vector<std::unique_ptr<Component>> components;
 
@@ -143,6 +142,11 @@ private:
 class EntityManager
 {
 public:
+	static EntityManager& GetInstance() {
+		static EntityManager instance;
+		return instance;
+	}
+
 	void Update()
 	{
 		for (auto& e : entityArray) e->Update();
@@ -188,14 +192,44 @@ public:
 
 	Entity& AddEntity()
 	{
-		Entity* e = new Entity(*this);
+		Entity* e = new Entity();
 		std::unique_ptr<Entity> uPtr{ e };
 		entityArray.emplace_back(std::move(uPtr));
 
 		return *e;
 	}
 
+	// Function to queue entity additions
+	// use this for creating entities in update
+	void QueueEntityToAdd(std::function<void()> createFunction)
+	{
+		if (GameManager::GetInstance().GetActiveGame())
+		{
+			entitiesToAddQueue.push_back(createFunction);
+		}
+	}
+
+	// Process the entity addition queue
+	void ProcessEntityAdditions()
+	{
+		for (auto& createFunction : entitiesToAddQueue)
+		{
+			createFunction();
+		}
+		entitiesToAddQueue.clear();
+	}
+
 private:
+	EntityManager() {
+		// Private constructor to prevent direct instantiation
+		// Initialization code here
+	}
+
+	EntityManager(const EntityManager&) = delete; // Disable copy constructor
+	EntityManager& operator=(const EntityManager&) = delete; // Disable assignment operator
+
 	std::vector<std::unique_ptr<Entity>> entityArray;
 	std::array<std::vector<Entity*>, maxGroups> groupedEntities;
+
+	std::vector<std::function<void()>> entitiesToAddQueue;
 };
