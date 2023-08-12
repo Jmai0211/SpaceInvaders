@@ -171,7 +171,7 @@ void GameManager::LoadSettings()
 
 void GameManager::SaveGame()
 {
-    std::ofstream file("game.bin");
+    std::ofstream file("game.bin", std::ios::binary);
     if (!file.is_open())
     {
         // Failed to open the INI file
@@ -184,7 +184,7 @@ void GameManager::SaveGame()
 
 void GameManager::LoadGame()
 {
-    std::ifstream file("game.bin");
+    std::ifstream file("game.bin", std::ios::binary);
     if (!file.is_open())
     {
         // Failed to open the INI file
