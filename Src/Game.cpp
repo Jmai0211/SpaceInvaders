@@ -18,6 +18,7 @@ SDL_Window* Game::window = nullptr;
 
 Text* scoreText;
 Text* healthText;
+Text* highScoreText;
 
 MainMenu menu;
 Map* map;
@@ -88,7 +89,7 @@ void Game::SetUpLevel()
 {
 	aManager = new AssetManager(&eManager);
 	// load game textures
-	aManager->AddTexture("Map", "Assets/Overworld.png");
+	//aManager->AddTexture("Map", "Assets/Overworld.png");
 
 	aManager->AddTexture("Player", "Assets/Player.png");
 
@@ -117,9 +118,11 @@ void Game::SetUpLevel()
 
 	scoreText = TextManager::AddText(200, 70, std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
 
+	highScoreText = TextManager::AddText(960, 70, std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetHighScore())).c_str());
+
 	healthText = TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
 
-	Map::LoadMap("Assets/test.map", 30, 30);
+	//Map::LoadMap("Assets/test.map", 30, 30);
 	
 	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
 }
@@ -168,6 +171,10 @@ void Game::HandleEvents()
 			break;
 		case GameManager::GameState::Playing:
 			player->GetComponent<PlayerComponent>().Input();
+			for (auto e : enemies)
+			{
+				e->GetComponent<EnemyAIComponent>().Input();
+			}
 			break;
 		default:
 			break;
@@ -185,12 +192,6 @@ void Game::Update()
 		eManager.Update();
 		eManager.Refresh();
 
-		if (enemies.size() == 0)
-		{
-			std::cout << "Spawn!" << std::endl;
-			SpawnEnemy();
-		}
-
 		// check for all collisions against the player
 		for (auto c : colliders)
 		{
@@ -199,7 +200,19 @@ void Game::Update()
 				c->tag == "Projectile" &&
 				c->entity->GetComponent<ProjectileComponent>().movementDirection < 0)
 			{
-				// handle player-enemmy bullet collision
+				player->GetComponent<PlayerComponent>().SetHealth(player->GetComponent<PlayerComponent>().GetHealth() - 1);
+
+				healthText->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
+
+				c->destroyed = true;
+
+				c->entity->Destroy();
+
+				if (player->GetComponent<PlayerComponent>().GetHealth() <= 0)
+				{
+					GameManager::GetInstance().SaveGame();
+					GameManager::GetInstance().SetActiveGame(false);
+				}
 			}
 		}
 
@@ -228,6 +241,12 @@ void Game::Update()
 						// update score
 						GameManager::GetInstance().SetScore(GameManager::GetInstance().GetScore() + 1);
 						scoreText->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
+
+						if (GameManager::GetInstance().GetScore() > GameManager::GetInstance().GetHighScore())
+						{
+							GameManager::GetInstance().SetHighScore(GameManager::GetInstance().GetScore());
+							highScoreText->UpdateText(std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
+						}
 					}
 				}
 			}
@@ -305,9 +324,9 @@ void Game::RemoveCollider(ColliderComponent* collider)
 
 void Game::SpawnEnemy()
 {
-	for (int y = 0; y < 1; y++)
+	for (int y = 0; y < 3; y++)
 	{
-		for (int x = 0; x < 1; x++)
+		for (int x = 0; x < 7; x++)
 		{
 			// Create a new enemy entity and store a reference to it in the vector
 			Entity& enemy = eManager.AddEntity();

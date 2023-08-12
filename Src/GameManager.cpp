@@ -7,10 +7,12 @@
 
 GameManager GameManager::instance;
 int GameManager::score = 0;
+int GameManager::highScore = 0;
 bool GameManager::activeGame = false;
 GameManager::GameState GameManager::state = GameManager::GameState::Menu;
 GameManager::Language GameManager::language = GameManager::Language::English;
 std::pair<int, int> GameManager::resolution = std::make_pair(1920, 1080);
+
 // return instance of game manager
 GameManager& GameManager::GetInstance()
 {
@@ -27,6 +29,16 @@ int GameManager::GetScore() const
 void GameManager::SetScore(int _score)
 {
 	score = _score;
+}
+
+int GameManager::GetHighScore() const
+{
+    return highScore;
+}
+
+void GameManager::SetHighScore(int _highScore)
+{
+    highScore = _highScore;
 }
 
 // get if the game is running
@@ -155,4 +167,30 @@ void GameManager::LoadSettings()
     // Set the loaded settings in the game manager
     GameManager::GetInstance().SetLanguage(static_cast<GameManager::Language>(language));
     GameManager::GetInstance().SetResolution(width, height);
+}
+
+void GameManager::SaveGame()
+{
+    std::ofstream file("game.bin");
+    if (!file.is_open())
+    {
+        // Failed to open the INI file
+        std::cout << "Failed to open 'game.bin' for writing." << std::endl;
+    }
+
+    file.write(reinterpret_cast<const char*>(&highScore), sizeof(int));
+    file.close();
+}
+
+void GameManager::LoadGame()
+{
+    std::ifstream file("game.bin");
+    if (!file.is_open())
+    {
+        // Failed to open the INI file
+        std::cout << "Failed to open 'game.bin' for reading." << std::endl;
+    }
+
+    file.read(reinterpret_cast<char*>(&highScore), sizeof(int));
+    file.close();
 }

@@ -57,9 +57,9 @@ public:
 		}
 
 		// player shoot function
-		if (InputManager::GetKeyDown(InputManager::Action::Back) && SDL_GetTicks() - lastFireTime >= 500)
+		if (InputManager::GetKeyDown(InputManager::Action::Shoot) && SDL_GetTicks() - lastFireTime >= 500)
 		{
-			Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, 5, "Bullet");
+			Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, 5);
 			lastFireTime = SDL_GetTicks();
 		}
 	}

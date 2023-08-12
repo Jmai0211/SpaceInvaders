@@ -9,6 +9,10 @@ public:
 	{
 		transform = &entity->GetComponent<TransformComponent>();
 		transform->Velocity.x = movementDirection;
+
+		coolDown = 100;
+		
+		transform->speed = 4;
 	}
 
 	void Update() override
@@ -18,12 +22,31 @@ public:
 			movementDirection *= -1;
 			transform->Velocity.x = movementDirection;
 		}
+
+		if (coolDown > 0)
+		{
+			coolDown--;
+		}
+	}
+
+	void Input()
+	{
+		if (coolDown <= 0)
+		{
+			if (RandomChance(30))
+			{
+				Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), -1, 5);
+			}
+			coolDown = rand() % 100 + 100;
+		}
 	}
 
 private:
 	TransformComponent* transform;
 
 	int movementDirection = 1;
+
+	int coolDown = 0;
 
 	// get random chance for shooting
 	bool RandomChance(int probability)

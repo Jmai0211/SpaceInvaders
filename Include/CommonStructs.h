@@ -29,6 +29,7 @@ const TextData textDataTable[] = {
 	{"Start Game", "开始游戏"},
 	{"Exit Game", "退出游戏"},
 	{"Score: ", "分数："},
+	{"Record: ", "记录："},
 	{"Health: ", "生命："},
 	{"Options", "设置"},
 	{"Language", "语言"},

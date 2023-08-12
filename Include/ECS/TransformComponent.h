@@ -26,7 +26,7 @@ public:
 	}
 
 	// constructor with parameters
-	TransformComponent(int x, int y, int w, int h)
+	TransformComponent(int x, int y, int w, int h, bool resize = true)
 	{
 		Position.x = x;
 		Position.y = y;
@@ -35,7 +35,19 @@ public:
 		defaultSize.x = w;
 		defaultSize.y = h;
 		Scale = 1;
-		Resize();
+
+		Rescale();
+
+		if (resize)
+		{
+			Reposition();
+		}
+		else
+		{
+			// set pivot point to center
+			Position.x = static_cast<int>(Position.x - (Size.x / 2.0f));
+			Position.y = static_cast<int>(Position.y - (Size.y / 2.0f));
+		}
 	}
 
 	void Init() override
@@ -58,7 +70,7 @@ public:
 		Position.y += Velocity.y * speed;
 	}
 
-	void Resize()
+	void Rescale()
 	{
 		// Calculate scale based on screen ratio
 		std::pair<int, int> resolution = GameManager::GetInstance().GetResolution();
@@ -74,16 +86,26 @@ public:
 			float scale = std::min(widthRatio, heightRatio);
 			Size.x = static_cast<int>(std::round(defaultSize.x * scale));
 			Size.y = static_cast<int>(std::round(defaultSize.y * scale));
-			Position.x = static_cast<int>(std::round(Position.x * scale - (Size.x / 2.0f)));
-			Position.y = static_cast<int>(std::round(Position.y * scale - (Size.y / 2.0f)));
 		}
 		else
 		{
 			// For non-square sprites, use the width and height ratios separately
 			Size.x = static_cast<int>(std::round(defaultSize.x * widthRatio));
 			Size.y = static_cast<int>(std::round(defaultSize.y * heightRatio));
-			Position.x = static_cast<int>(std::round(Position.x * widthRatio - (Size.x / 2.0f)));
-			Position.y = static_cast<int>(std::round(Position.y * heightRatio - (Size.y / 2.0f)));
 		}
+	}
+
+	void Reposition()
+	{
+		// Calculate scale based on screen ratio
+		std::pair<int, int> resolution = GameManager::GetInstance().GetResolution();
+		int screenWidth = resolution.first;
+		int screenHeight = resolution.second;
+
+		float widthRatio = static_cast<float>(screenWidth) / 1920.0f;
+		float heightRatio = static_cast<float>(screenHeight) / 1080.0f;
+
+		Position.x = static_cast<int>(std::round(Position.x * widthRatio - (Size.x / 2.0f)));
+		Position.y = static_cast<int>(std::round(Position.y * heightRatio - (Size.y / 2.0f)));
 	}
 };

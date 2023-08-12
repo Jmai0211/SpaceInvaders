@@ -8,10 +8,10 @@ AssetManager::~AssetManager()
 {
 }
 
-void AssetManager::CreateProjectile(Vector2D position, int direction, int speed, std::string id)
+void AssetManager::CreateProjectile(Vector2D position, int direction, int speed)
 {
 	auto& projectile(eManager->AddEntity());
-	projectile.AddComponent<TransformComponent>(position.x, position.y, 64, 64);
+	projectile.AddComponent<TransformComponent>(position.x, position.y, 64, 64, false);
 	projectile.AddComponent<SpriteComponent>("Bullet");
 	projectile.AddComponent<ProjectileComponent>(direction, speed);
 	projectile.AddComponent<ColliderComponent>("Projectile");

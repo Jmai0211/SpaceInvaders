@@ -25,6 +25,9 @@ public:
 	int GetScore() const;
 	void SetScore(int _score);
 
+	int GetHighScore() const;
+	void SetHighScore(int _highScore);
+
 	bool GetActiveGame() const;
 	void SetActiveGame(bool _activeGame);
 
@@ -42,6 +45,9 @@ public:
 	void SaveSettings();
 	void LoadSettings();
 
+	void SaveGame();
+	void LoadGame();
+
 private:
 	GameManager() = default;
 	~GameManager() = default;
@@ -51,6 +57,7 @@ private:
 	static GameManager instance;
 
 	static int score;
+	static int highScore;
 	static bool activeGame;
 	static GameState state;
 	static Language language;

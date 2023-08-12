@@ -14,6 +14,8 @@ int main(int argc, char *argv[])
 	// load settings at start
 	GameManager::GetInstance().LoadSettings();
 
+	GameManager::GetInstance().LoadGame();
+
 	// limit fps
 	const int TargetFPS = 60;
 	const int frameDelay = 1000 / TargetFPS;
