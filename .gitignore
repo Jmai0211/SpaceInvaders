@@ -24,5 +24,9 @@
 *.la
 *.a
 
-# ignore the build directory.
+# build directory.
 /build
+
+# save files
+*game.bin
+*settings.ini
