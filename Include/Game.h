@@ -19,9 +19,6 @@ public:
 		groupProjectile,
 	};
 
-	Game();
-	~Game();
-
 	void Init(const char* title, int xPos, int yPos);
 
 	void HandleEvents();

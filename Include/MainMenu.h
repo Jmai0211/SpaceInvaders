@@ -25,9 +25,6 @@ private:
 	// remove main menu related UI
 	void UnsetMenu();
 
-	// highlight or unhighlight text
-	void UpdateTextColor(Text* _text, bool highlight);
-
 	// change the language of the game
 	void ChangeLanguage();
 
@@ -47,9 +44,6 @@ private:
 
 	size_t languageIndex = 0;
 	size_t resolutionIndex = 0;
-
-	std::vector<Text*> menuText;
-	std::vector<Text*> optionsText;
 
 	std::string resolutionString;
 };

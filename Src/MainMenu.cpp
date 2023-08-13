@@ -16,14 +16,13 @@ void MainMenu::SetUpMenu()
 {
 	GameManager::GetInstance().SetState(GameManager::GameState::Menu);
 	menuIndex = 1;
-	menuText.push_back(TextManager::AddText(960, 230, TextManager::GetLocalizedText("Space Invaders")));
-	menuText[0]->SetScale(2, 2);
+	TextManager::AddText(960, 230, TextManager::GetLocalizedText("Space Invaders"), game->aManager->GetFont("Large"), "Title");
 
-	menuText.push_back(TextManager::AddText(960, 500, TextManager::GetLocalizedText("Start Game")));
-	menuText.push_back(TextManager::AddText(960, 700, TextManager::GetLocalizedText("Options")));
-	menuText.push_back(TextManager::AddText(960, 900, TextManager::GetLocalizedText("Exit Game")));
+	TextManager::AddText(960, 500, TextManager::GetLocalizedText("Start Game"), game->aManager->GetFont("Normal"), "StartGame");
+	TextManager::AddText(960, 700, TextManager::GetLocalizedText("Options"), game->aManager->GetFont("Normal"), "Options");
+	TextManager::AddText(960, 900, TextManager::GetLocalizedText("Exit Game"), game->aManager->GetFont("Normal"), "ExitGame");
 
-	UpdateTextColor(menuText[menuIndex], true);
+	TextManager::textArray["StartGame"]->UpdateColor({ 255, 255, 0, 255 });
 }
 
 // setup options menu
@@ -46,38 +45,38 @@ void MainMenu::SetUpOptions()
 		}
 	}
 
-	optionsText.push_back(TextManager::AddText(960, 230, TextManager::GetLocalizedText("Options")));
-	optionsText[0]->SetScale(2, 2);
+	TextManager::AddText(960, 230, TextManager::GetLocalizedText("Options"), game->aManager->GetFont("Large"), "OptionsTitle");
 
-	optionsText.push_back(TextManager::AddText(650, 500, TextManager::GetLocalizedText("Language")));
+	TextManager::AddText(650, 500, TextManager::GetLocalizedText("Language"), game->aManager->GetFont("Normal"), "LanguageTitle");
 
-	optionsText.push_back(TextManager::AddText(1250, 500, TextManager::GetLocalizedText("English")));
+	TextManager::AddText(1250, 500, TextManager::GetLocalizedText("English"), game->aManager->GetFont("Normal"), "Language");
 
-	optionsText.push_back(TextManager::AddText(650, 700, TextManager::GetLocalizedText("Resolution")));
+	TextManager::AddText(650, 700, TextManager::GetLocalizedText("Resolution"), game->aManager->GetFont("Normal"), "ResolutionTitle");
 
-	optionsText.push_back(TextManager::AddText(1250, 700, ConvertResolution(GameManager::GetInstance().GetResolution().first, GameManager::GetInstance().GetResolution().second)));
+	TextManager::AddText(1250, 700, ConvertResolution(GameManager::GetInstance().GetResolution().first, GameManager::GetInstance().GetResolution().second), game->aManager->GetFont("Normal"), "Resolution");
 
-	UpdateTextColor(optionsText[optionIndex], true);
+	TextManager::textArray["Language"]->UpdateColor({ 255, 255, 0, 255 });
 }
 
 // clear options list to avoid memory leak / unnecessary memory usage
 void MainMenu::UnsetOptions()
 {
-	for (size_t i = 0; i < optionsText.size(); i++)
-	{
-		delete optionsText[i];
-	}
-	optionsText.clear();
+	TextManager::UnRegisterText("OptionsTitle");
+	TextManager::UnRegisterText("LanguageTitle");
+	TextManager::UnRegisterText("Language");
+	TextManager::UnRegisterText("ResolutionTitle");
+	TextManager::UnRegisterText("Resolution");
+	TextManager::insertionOrder.clear();
 }
 
 // clear menu list to avoid memory leak / unnecessary memory usage
 void MainMenu::UnsetMenu()
 {
-	for (size_t i = 0; i < menuText.size(); i++)
-	{
-		delete menuText[i];
-	}
-	menuText.clear();
+	TextManager::UnRegisterText("Title");
+	TextManager::UnRegisterText("StartGame");
+	TextManager::UnRegisterText("Options");
+	TextManager::UnRegisterText("ExitGame");
+	TextManager::insertionOrder.clear();
 }
 
 // handle menu input
@@ -101,19 +100,6 @@ void MainMenu::Input()
 	}
 }
 
-// highlight selected option, unhighlight unselected option
-void MainMenu::UpdateTextColor(Text* _text, bool highlight)
-{
-	if (highlight)
-	{
-		_text->UpdateColor({ 255, 255, 0, 255 });
-	}
-	else
-	{
-		_text->UpdateColor({ 255, 255, 255, 255 });
-	}
-}
-
 // change language 
 void MainMenu::ChangeLanguage()
 {
@@ -133,10 +119,10 @@ void MainMenu::ChangeLanguage()
 	GameManager::GetInstance().SetWindowTitle(TextManager::GetLocalizedText("Space Invaders"));
 
 	// update options menu text after changing language
-	optionsText[0]->UpdateText(TextManager::GetLocalizedText("Options"));
-	optionsText[1]->UpdateText(TextManager::GetLocalizedText("Language"));
-	optionsText[2]->UpdateText(TextManager::GetLocalizedText("English"));
-	optionsText[3]->UpdateText(TextManager::GetLocalizedText("Resolution"));
+	TextManager::textArray["OptionsTitle"]->UpdateText(TextManager::GetLocalizedText("Options"));
+	TextManager::textArray["LanguageTitle"]->UpdateText(TextManager::GetLocalizedText("Language"));
+	TextManager::textArray["Language"]->UpdateText(TextManager::GetLocalizedText("English"));
+	TextManager::textArray["ResolutionTitle"]->UpdateText(TextManager::GetLocalizedText("Resolution"));
 }
 
 // convert resolution from integers to const char for rendering text
@@ -169,27 +155,48 @@ void MainMenu::MenuNavigation()
 		lastMenuChangeTime = SDL_GetTicks();
 	}
 	// move up
-	else if (InputManager::GetKeyDown(InputManager::Action::Up))
+	else if (InputManager::GetKeyDown(InputManager::Action::Up) && menuIndex > 1)
 	{
-		if (menuIndex > 1)
+		std::string id = TextManager::insertionOrder[menuIndex];
+		auto it = TextManager::textArray.find(id);
+		if (it != TextManager::textArray.end())
 		{
-			UpdateTextColor(menuText[menuIndex], false);
-			menuIndex--;
-			UpdateTextColor(menuText[menuIndex], true);
+			it->second->UpdateColor({ 255, 255, 255, 255 });
+		}
+
+		// Increase the menuIndex
+		menuIndex--;
+
+		id = TextManager::insertionOrder[menuIndex];
+		it = TextManager::textArray.find(id);
+		if (it != TextManager::textArray.end()) 
+		{
+			it->second->UpdateColor({ 255, 255, 0, 255 });
 		}
 		lastMenuChangeTime = SDL_GetTicks();
 	}
 	// move down
-	else if (InputManager::GetKeyDown(InputManager::Action::Down))
+	else if (InputManager::GetKeyDown(InputManager::Action::Down) && menuIndex < TextManager::insertionOrder.size() - 1)
 	{
-		if (menuIndex < menuText.size() - 1)
+		std::string id = TextManager::insertionOrder[menuIndex];
+		auto it = TextManager::textArray.find(id);
+		if (it != TextManager::textArray.end()) 
 		{
-			UpdateTextColor(menuText[menuIndex], false);
-			menuIndex++;
-			UpdateTextColor(menuText[menuIndex], true);
+			it->second->UpdateColor({ 255, 255, 255, 255 });
+		}
+
+		// Increase the menuIndex
+		menuIndex++;
+
+		id = TextManager::insertionOrder[menuIndex];
+		it = TextManager::textArray.find(id);
+		if (it != TextManager::textArray.end())
+		{
+			it->second->UpdateColor({ 255, 255, 0, 255 });
 		}
 		lastMenuChangeTime = SDL_GetTicks();
 	}
+
 }
 
 // options menu input
@@ -204,25 +211,44 @@ void MainMenu::OptionNavigation()
 		lastMenuChangeTime = SDL_GetTicks();
 	}
 	// move up
-	else if (InputManager::GetKeyDown(InputManager::Action::Up))
+	else if (InputManager::GetKeyDown(InputManager::Action::Up) && optionIndex > 2)
 	{
-		// options menu
-		if (optionIndex > 2)
+		std::string id = TextManager::insertionOrder[optionIndex];
+		auto it = TextManager::textArray.find(id);
+		if (it != TextManager::textArray.end()) 
 		{
-			UpdateTextColor(optionsText[optionIndex], false);
-			optionIndex -= 2;
-			UpdateTextColor(optionsText[optionIndex], true);
+			it->second->UpdateColor({ 255, 255, 255, 255 });
+		}
+
+		// Increase the menuIndex
+		optionIndex -= 2;
+
+		id = TextManager::insertionOrder[optionIndex];
+		it = TextManager::textArray.find(id);
+		if (it != TextManager::textArray.end())
+		{
+			it->second->UpdateColor({ 255, 255, 0, 255 });
 		}
 		lastMenuChangeTime = SDL_GetTicks();
 	}
 	// move down
-	else if (InputManager::GetKeyDown(InputManager::Action::Down))
+	else if (InputManager::GetKeyDown(InputManager::Action::Down) && optionIndex < TextManager::textArray.size() - 1)
 	{
-		if (optionIndex < optionsText.size() - 1)
+		std::string id = TextManager::insertionOrder[optionIndex];
+		auto it = TextManager::textArray.find(id);
+		if (it != TextManager::textArray.end())
 		{
-			UpdateTextColor(optionsText[optionIndex], false);
-			optionIndex += 2;
-			UpdateTextColor(optionsText[optionIndex], true);
+			it->second->UpdateColor({ 255, 255, 255, 255 });
+		}
+
+		// Increase the menuIndex
+		optionIndex += 2;
+
+		id = TextManager::insertionOrder[optionIndex];
+		it = TextManager::textArray.find(id);
+		if (it != TextManager::textArray.end())
+		{
+			it->second->UpdateColor({ 255, 255, 0, 255 });
 		}
 		lastMenuChangeTime = SDL_GetTicks();
 	}
@@ -239,7 +265,7 @@ void MainMenu::OptionNavigation()
 		{
 			resolutionIndex++;
 			GameManager::GetInstance().SetResolution(resolutionTable[resolutionIndex].width, resolutionTable[resolutionIndex].height);
-			optionsText[optionIndex]->UpdateText(ConvertResolution(resolutionTable[resolutionIndex].width, resolutionTable[resolutionIndex].height));
+			TextManager::textArray["Resolution"]->UpdateText(ConvertResolution(resolutionTable[resolutionIndex].width, resolutionTable[resolutionIndex].height));
 			lastMenuChangeTime = SDL_GetTicks();
 		}
 	}
@@ -255,7 +281,7 @@ void MainMenu::OptionNavigation()
 		{
 			resolutionIndex--;
 			GameManager::GetInstance().SetResolution(resolutionTable[resolutionIndex].width, resolutionTable[resolutionIndex].height);
-			optionsText[optionIndex]->UpdateText(ConvertResolution(resolutionTable[resolutionIndex].width, resolutionTable[resolutionIndex].height));
+			TextManager::textArray["Resolution"]->UpdateText(ConvertResolution(resolutionTable[resolutionIndex].width, resolutionTable[resolutionIndex].height));
 			lastMenuChangeTime = SDL_GetTicks();
 		}
 	}

@@ -16,10 +16,6 @@
 SDL_Renderer* Game::renderer = nullptr;
 SDL_Window* Game::window = nullptr;
 
-Text* scoreText;
-Text* healthText;
-Text* highScoreText;
-
 MainMenu menu;
 Map* map;
 EntityManager& eManager = EntityManager::GetInstance();
@@ -31,21 +27,11 @@ std::vector<ColliderComponent*> Game::colliders;
 
 AssetManager* Game::aManager;
 
-Game::Game()
-{
-}
-
-Game::~Game()
-{
-	TextManager::CleanUp();
-}
-
 void Game::Init(const char* title, int xPos, int yPos)
 {
 	// fullscreen information
 	int flags = 0;
-
-	if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
+	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0)
 	{
 		std::cout << "Subsystems initialized!" << std::endl;
 
@@ -70,9 +56,13 @@ void Game::Init(const char* title, int xPos, int yPos)
 			std::cout << "Renderer created!" << std::endl;
 		}
 
-		TextManager::Init();
-
 		GameManager::GetInstance().SetActiveGame(true);
+
+		aManager = new AssetManager();
+
+		aManager->AddFont("Small", "Assets/SmileySans-Oblique.ttf", 60);
+		aManager->AddFont("Normal", "Assets/SmileySans-Oblique.ttf", 96);
+		aManager->AddFont("Large", "Assets/SmileySans-Oblique.ttf", 144);
 
 		menu.SetUpMenu();
 
@@ -86,7 +76,6 @@ void Game::Init(const char* title, int xPos, int yPos)
 
 void Game::SetUpLevel()
 {
-	aManager = new AssetManager();
 	// load game textures
 	//aManager->AddTexture("Map", "Assets/Overworld.png");
 
@@ -94,11 +83,9 @@ void Game::SetUpLevel()
 
 	aManager->AddTexture("Enemy", "Assets/Enemy1.png");
 
-	aManager->AddTexture("Bullet", "Assets/bullet.png");
+	aManager->AddTexture("PlayerBullet", "Assets/PlayerBullet.png");
 
-	aManager->AddTexture("LeftArrow", "Assets/LeftArrow.png");
-
-	aManager->AddTexture("RightArrow", "Assets/RightArrow.png");
+	aManager->AddTexture("EnemyBullet", "Assets/EnemyBullet.png");
 
 	player = &eManager.AddEntity();
 
@@ -117,11 +104,11 @@ void Game::SetUpLevel()
 
 	SpawnEnemy();
 
-	scoreText = TextManager::AddText(200, 70, std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
+	TextManager::AddText(200, 70, std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str(), Game::aManager->GetFont("Normal"), "Score");
 
-	highScoreText = TextManager::AddText(960, 70, std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetHighScore())).c_str());
+	TextManager::AddText(960, 70, std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetHighScore())).c_str(), Game::aManager->GetFont("Normal"), "Record");
 
-	healthText = TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
+	TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str(), Game::aManager->GetFont("Normal"), "Health");
 
 	//Map::LoadMap("Assets/test.map", 30, 30);
 	
@@ -146,6 +133,7 @@ void Game::HandleEvents()
 		{
 		// close window
 		case SDL_QUIT:
+			Clean();
 			GameManager::GetInstance().SetActiveGame(false);
 			break;
 		// when controller connected
@@ -184,6 +172,8 @@ void Game::Update()
 	{
 	case GameManager::GameState::Menu:
 		break;
+	case GameManager::GameState::Option:
+		break;
 	case GameManager::GameState::Playing:
 		eManager.ProcessEntityAdditions();
 		eManager.Update();
@@ -193,13 +183,14 @@ void Game::Update()
 		for (auto c : colliders)
 		{
 			// enemy bullet
-			if (CollisionManager::CheckCollision(player->GetComponent<ColliderComponent>(), *c) &&
+			if (!c->destroyed &&
+				CollisionManager::CheckCollision(player->GetComponent<ColliderComponent>(), *c) &&
 				c->tag == "Projectile" &&
 				c->entity->GetComponent<ProjectileComponent>().movementDirection < 0)
 			{
 				player->GetComponent<PlayerComponent>().SetHealth(player->GetComponent<PlayerComponent>().GetHealth() - 1);
 
-				healthText->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
+				TextManager::textArray["Health"]->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
 
 				c->destroyed = true;
 
@@ -208,7 +199,8 @@ void Game::Update()
 				if (player->GetComponent<PlayerComponent>().GetHealth() <= 0)
 				{
 					GameManager::GetInstance().SaveGame();
-					GameManager::GetInstance().SetActiveGame(false);
+					GameManager::GetInstance().SetState(GameManager::GameState::GameOver);
+					TextManager::AddText(960, 540, TextManager::GetLocalizedText("Game Over"), Game::aManager->GetFont("Large"), "GameOver");
 				}
 			}
 		}
@@ -237,12 +229,12 @@ void Game::Update()
 						e->Destroy();
 						// update score
 						GameManager::GetInstance().SetScore(GameManager::GetInstance().GetScore() + 1);
-						scoreText->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
+						TextManager::textArray["Score"]->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
 
 						if (GameManager::GetInstance().GetScore() > GameManager::GetInstance().GetHighScore())
 						{
 							GameManager::GetInstance().SetHighScore(GameManager::GetInstance().GetScore());
-							highScoreText->UpdateText(std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
+							TextManager::textArray["Record"]->UpdateText(std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
 						}
 					}
 				}
@@ -268,6 +260,7 @@ void Game::Render()
 	switch (GameManager::GetInstance().GetState())
 	{
 	case GameManager::GameState::Menu:
+	case GameManager::GameState::Option:
 		break;
 	case GameManager::GameState::Playing:
 		for (auto& t : tilesGroup)
@@ -286,8 +279,6 @@ void Game::Render()
 		{
 			p->Render();
 		}
-
-		LevelManager::Render();
 		break;
 	case GameManager::GameState::GameOver:
 		break;
@@ -304,9 +295,9 @@ void Game::Render()
 // destroyed created instances and close window
 void Game::Clean()
 {
+	delete aManager;
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
-	LevelManager::Clean();
 	SDL_Quit();
 }
 

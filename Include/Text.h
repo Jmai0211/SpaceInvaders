@@ -10,9 +10,8 @@ public:
 	int xScale;
 	int yScale;
 
-	Text(int x, int y, const char* _text);
+	Text(int x, int y, const char* _text, TTF_Font* _font);
 	~Text();
-	void GenerateTexture();
 
 	void UpdateText(const char* _text);
 	void UpdateColor(SDL_Color color);
@@ -21,9 +20,12 @@ public:
 	void SetScale(int x, int y);
 
 private:
+	TTF_Font* font;
 	const char* text;
 	SDL_Surface* surface;
 	SDL_Texture* texture;
 	SDL_Color textColor;
+
+	void GenerateTexture();
 };
 

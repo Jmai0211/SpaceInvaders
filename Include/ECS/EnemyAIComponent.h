@@ -47,7 +47,7 @@ public:
 		{
 			if (RandomChance(30))
 			{
-				Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), -1, bulletSpeed);
+				Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), -1, bulletSpeed, "EnemyBullet");
 			}
 			coolDown = rand() % 100 + 100;
 		}

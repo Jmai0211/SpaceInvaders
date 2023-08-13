@@ -3,62 +3,36 @@
 #include <iostream>
 
 TTF_Font* TextManager::font;
-std::vector<Text*> TextManager::textArray;
-
-// initialize font
-void TextManager::Init()
-{
-	if (TTF_Init() < 0)
-	{
-		std::cout << "Failed to initialize font: " << TTF_GetError() << std::endl;
-	}
-
-	font = TTF_OpenFont("Assets/SmileySans-Oblique.ttf", 84);
-	if (!font)
-	{
-		std::cout << "Failed to load font: " << TTF_GetError() << std::endl;
-	}
-}
-
-// clean up font and text data
-void TextManager::CleanUp()
-{
-	for (Text* text : textArray)
-	{
-		delete text;
-	}
-	TTF_CloseFont(font);
-	TTF_Quit();
-}
+std::map<std::string, Text*> TextManager::textArray;
+std::vector<std::string> TextManager::insertionOrder;
 
 // render text
 void TextManager::Render()
 {
-	for (Text* text : textArray)
+	for (auto text : textArray)
 	{
-		text->render();
+		text.second->render();
 	}
 }
 
 // create new text
-Text* TextManager::AddText(int x, int y, const char* text)
+void TextManager::AddText(int x, int y, const char* text, TTF_Font* _font, std::string id)
 {
-	Text* newText = new Text(x, y, text);
-	textArray.push_back(newText);
-	return newText;
+	Text* newText = new Text(x, y, text, _font);
+	textArray.emplace(id, newText);
+
+	insertionOrder.push_back(id);
 }
 
 // remove text
-void TextManager::UnRegisterText(Text* text)
+void TextManager::UnRegisterText(std::string id)
 {
-	std::vector<Text*>::iterator target = std::find(textArray.begin(), textArray.end(), text);
-	if (target != textArray.end())
-	{
-		textArray.erase(target);
-	}
-	else
-	{
-		std::cout << "Could not find!" << std::endl;
+	auto it = textArray.find(id);
+
+	if (it != textArray.end()) {
+		// Item found, erase it from the map
+		delete it->second; // Clean up the Text object
+		textArray.erase(it);
 	}
 }
 

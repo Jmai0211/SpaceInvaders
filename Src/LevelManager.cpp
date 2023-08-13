@@ -2,22 +2,6 @@
 
 int LevelManager::difficulty = 1;
 
-void LevelManager::Update()
-{
-}
-
-// render all level related data
-void LevelManager::Render()
-{
-
-}
-
-// delete all level related data
-void LevelManager::Clean()
-{
-
-}
-
 int LevelManager::GetDifficulty()
 {
 	return difficulty;

@@ -1,10 +1,11 @@
 #include "Text.h"
 #include "TextManager.h"
 #include "GameManager.h"
+#include "AssetManager.h"
 #include <iostream>
 #include "Game.h"
 
-Text::Text(int x, int y, const char* _text)
+Text::Text(int x, int y, const char* _text, TTF_Font* _font)
 {
 	xPos = x;
 	yPos = y;
@@ -12,6 +13,7 @@ Text::Text(int x, int y, const char* _text)
 	xScale = 1;
 	yScale = 1;
 
+	font = _font;
 	text = _text;
 
 	textColor = { 255, 255, 255, 255 };
@@ -25,7 +27,6 @@ Text::~Text()
 {
 	SDL_DestroyTexture(texture);
 	SDL_FreeSurface(surface);
-	TextManager::UnRegisterText(this);
 }
 
 // create text texture
@@ -42,7 +43,7 @@ void Text::GenerateTexture()
 		texture = NULL; // Set to NULL after freeing to avoid double deletion
 	}
 
-	surface = TTF_RenderUTF8_Blended(TextManager::font, text, textColor);
+	surface = TTF_RenderUTF8_Blended(font, text, textColor);
 	if (surface == NULL)
 	{
 		std::cout << "Failed to render text: " << TTF_GetError() << std::endl;

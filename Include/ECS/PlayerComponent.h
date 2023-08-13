@@ -55,7 +55,7 @@ public:
 		// player shoot function
 		if (InputManager::GetKeyDown(InputManager::Action::Shoot) && SDL_GetTicks() - lastFireTime >= 300)
 		{
-			Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, bulletSpeed);
+			Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, bulletSpeed, "PlayerBullet");
 			lastFireTime = SDL_GetTicks();
 		}
 	}
