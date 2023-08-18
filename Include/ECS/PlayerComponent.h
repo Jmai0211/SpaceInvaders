@@ -34,26 +34,46 @@ public:
 		//{
 		//	transform->Velocity.y = 0;
 		//}
+	}
 
-		// player x movement
-		if (InputManager::GetKeyDown(InputManager::Action::LeftMovement) && transform->Position.x >= 0)
+	void HorizontalMovement(int axisValue)
+	{
+		// move left
+		if (axisValue < 0)
 		{
-			transform->Velocity.x = -1;
-			entity->GetComponent<SpriteComponent>().Play("Walk_Left");
+			if (transform->Position.x > 0)
+			{
+				transform->Velocity.x = -1;
+				entity->GetComponent<SpriteComponent>().Play("Walk_Left");
+			}
+			else
+			{
+				transform->Velocity.x = 0;
+			}
 		}
-		else if (InputManager::GetKeyDown(InputManager::Action::RightMovement)
-			&& transform->Position.x <= GameManager::GetInstance().GetResolution().first - transform->Size.x)
+		// move right
+		else if (axisValue > 0)
 		{
-			transform->Velocity.x = 1;
-			entity->GetComponent<SpriteComponent>().Play("Walk_Right");
+			if (transform->Position.x < GameManager::GetInstance().GetResolution().first - transform->Size.x)
+			{
+				transform->Velocity.x = 1;
+				entity->GetComponent<SpriteComponent>().Play("Walk_Right");
+			}
+			else
+			{
+				transform->Velocity.x = 0;
+			}
 		}
+		// no movement
 		else
 		{
 			transform->Velocity.x = 0;
 		}
+	}
 
-		// player shoot function
-		if (InputManager::GetKeyDown(InputManager::Action::Shoot) && SDL_GetTicks() - lastFireTime >= 300)
+	void Attack()
+	{
+		if (SDL_GetTicks() - lastFireTime >= 300)
 		{
 			Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, bulletSpeed, "PlayerBullet");
 			lastFireTime = SDL_GetTicks();

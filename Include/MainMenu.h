@@ -2,7 +2,6 @@
 #include "SDL_ttf.h"
 #include "TextManager.h"
 #include "Text.h"
-#include "InputManager.h"
 
 class Game;
 
@@ -12,9 +11,15 @@ public:
 	// setup main menu related UI for display
 	void SetUpMenu();
 
-	// handle input events when in menu
-	void Input();
+	void MenuConfirm();
+	void MenuUp();
+	void MenuDown();
 
+	void OptionBack();
+	void OptionLeft();
+	void OptionRight();
+	void OptionUp();
+	void OptionDown();
 private:
 	// setup option menu related UI for display
 	void SetUpOptions();
@@ -30,12 +35,6 @@ private:
 
 	// convert resolution from integer values to characters that can be displayed as text
 	const char* ConvertResolution(int width, int height);
-
-	// handle main menu input
-	void MenuNavigation();
-
-	// handle option menu input
-	void OptionNavigation();
 
 	static Game* game;
 

@@ -1,11 +1,15 @@
 #include "InputManager.h"
 #include "GameManager.h"
+#include "ECS.h"
+#include "Components.h"
 
 SDL_GameController* InputManager::controller = nullptr;
 InputManager::Control InputManager::control = InputManager::Control::Keyboard;
 
+Game* InputManager::game;
+
 // get if input key is pressed
-bool InputManager::GetKeyDown(Action _action)
+bool InputManager::GetKey(Action _action)
 {
     switch (control)
     {
@@ -40,6 +44,114 @@ InputManager::Control InputManager::GetControl()
 void InputManager::SetControl(Control _control)
 {
     control = _control;
+}
+
+void InputManager::InputKeyDown()
+{
+    switch (GameManager::GetInstance().GetState())
+    {
+    case GameManager::GameState::Menu:
+        if (GetKey(Action::Confirm))
+        {
+            game->menu.MenuConfirm();
+        }
+        else if (GetKey(Action::Up))
+        {
+            game->menu.MenuUp();
+        }
+        else if (GetKey(Action::Down))
+        {
+            game->menu.MenuDown();
+        }
+        break;
+    case GameManager::GameState::Option:
+        if (GetKey(Action::Back))
+        {
+            game->menu.OptionBack();
+        }
+        else if (GetKey(Action::Left))
+        {
+            game->menu.OptionLeft();
+        }
+        else if (GetKey(Action::Right))
+        {
+            game->menu.OptionRight();
+        }
+        else if (GetKey(Action::Up))
+        {
+            game->menu.OptionUp();
+        }
+        else if (GetKey(Action::Down))
+        {
+            game->menu.OptionDown();
+        }
+        break;
+    case GameManager::GameState::Playing:
+        break;
+    case GameManager::GameState::GameOver:
+        if (GetKey(Action::Back))
+        {
+            game->Restart();
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+void InputManager::InputKeyUp()
+{
+    switch (GameManager::GetInstance().GetState())
+    {
+    case GameManager::GameState::Menu:
+        break;
+    case GameManager::GameState::Option:
+        break;
+    case GameManager::GameState::Playing:
+        if (!GetKey(Action::LeftMovement) && !GetKey(Action::RightMovement))
+        {
+            game->player->GetComponent<PlayerComponent>().HorizontalMovement(0);
+        }
+        break;
+    case GameManager::GameState::GameOver:
+        break;
+    default:
+        break;
+    }
+}
+
+void InputManager::InputHold()
+{
+    switch (GameManager::GetInstance().GetState())
+    {
+    case GameManager::GameState::Menu:
+        break;
+    case GameManager::GameState::Option:
+        break;
+    case GameManager::GameState::Playing:
+        if (GetKey(Action::LeftMovement))
+        {
+            game->player->GetComponent<PlayerComponent>().HorizontalMovement(-1);
+        }
+        else if (GetKey(Action::RightMovement))
+        {
+            game->player->GetComponent<PlayerComponent>().HorizontalMovement(1);
+        }
+        else if (!GetKey(Action::LeftMovement) && !GetKey(Action::RightMovement))
+        {
+            game->player->GetComponent<PlayerComponent>().HorizontalMovement(0);
+        }
+        
+        if (GetKey(Action::Shoot))
+        {
+            game->player->GetComponent<PlayerComponent>().Attack();
+        }
+        break;
+    case GameManager::GameState::GameOver:
+        break;
+    default:
+        break;
+    }
 }
 
 // handle keyboard input

@@ -16,11 +16,11 @@
 SDL_Renderer* Game::renderer = nullptr;
 SDL_Window* Game::window = nullptr;
 
-MainMenu menu;
+MainMenu Game::menu;
 Map* map;
 EntityManager& eManager = EntityManager::GetInstance();
 
-Entity* player;
+Entity* Game::player;
 std::vector<Entity*> enemies;
 
 std::vector<ColliderComponent*> Game::colliders;
@@ -136,6 +136,7 @@ void Game::HandleEvents()
 			{
 				InputManager::SetControl(InputManager::Control::Keyboard);
 			}
+			InputManager::InputKeyDown();
 			break;
 		// when the player presses a button or pushes a joystick on the controller, switch control mode over to controller control
 		case SDL_CONTROLLERBUTTONDOWN:
@@ -144,26 +145,13 @@ void Game::HandleEvents()
 			{
 				InputManager::SetControl(InputManager::Control::Controller);
 			}
+			InputManager::InputKeyDown();
 			break;
-		default:
+		case SDL_KEYUP:
+			InputManager::InputKeyUp();
 			break;
-		}
-
-		// handle input
-		switch (GameManager::GetInstance().GetState())
-		{
-		case GameManager::GameState::Menu:
-		case GameManager::GameState::Option:
-			menu.Input();
-			break;
-		case GameManager::GameState::Playing:
-			break;
-		case GameManager::GameState::GameOver:
-			if (InputManager::GetKeyDown(InputManager::Action::Back))
-			{
-				Restart();
-			}
-			break;
+		case SDL_CONTROLLERBUTTONUP:
+			InputManager::InputKeyUp();
 		default:
 			break;
 		}
@@ -172,12 +160,9 @@ void Game::HandleEvents()
 
 void Game::Update()
 {
+	InputManager::InputHold();
 	switch (GameManager::GetInstance().GetState())
 	{
-	case GameManager::GameState::Menu:
-		break;
-	case GameManager::GameState::Option:
-		break;
 	case GameManager::GameState::Playing:
 		eManager.ProcessEntityAdditions();
 		eManager.Update();

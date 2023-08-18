@@ -1,6 +1,8 @@
 #pragma once
 #include "SDL.h"
 #include <iostream>
+#include "Game.h"
+#include "MainMenu.h"
 
 class InputManager
 {
@@ -26,7 +28,7 @@ public:
 		Controller
 	};
 
-	static bool GetKeyDown(Action _action);
+	static bool GetKey(Action _action);
 
 	static SDL_GameController* GetController();
 	static void SetController(SDL_GameController* _controller);
@@ -34,8 +36,14 @@ public:
 	static Control GetControl();
 	static void SetControl(Control _control);
 
+	static void InputKeyDown();
+	static void InputKeyUp();
+
+	static void InputHold();
+
 private:
 	static SDL_GameController* controller;
+	static Game* game;
 
 	static Control control;
 
