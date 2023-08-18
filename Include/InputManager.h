@@ -31,7 +31,7 @@ public:
 	static SDL_GameController* GetController();
 	static void SetController(SDL_GameController* _controller);
 
-	Control GetControl() const;
+	static Control GetControl();
 	static void SetControl(Control _control);
 
 private:

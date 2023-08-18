@@ -36,7 +36,9 @@ const TextData textDataTable[] = {
 	{"English", "中文"},
 	{"Resolution", "分辨率"},
 	{"Fullscreen", "全屏"},
-	{"Game Over", "游戏结束"}
+	{"Game Over", "游戏结束"},
+	{"Press A to restart", "按下A重新开始游戏"},
+	{"Press ESC to restart", "按下ESC重新开始游戏"}
 };
 
 #endif // COMMONSTRUCTS_H

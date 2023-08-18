@@ -39,6 +39,9 @@ public:
 	static AssetManager* aManager;
 
 private:
+	void SpawnPlayer();
 	void SpawnEnemy();
 	void RemoveEnemy(Entity* enemy);
+	// reset all game data and re spawn player and enemies
+	void Restart();
 };

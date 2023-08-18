@@ -1,4 +1,5 @@
 #include "InputManager.h"
+#include "GameManager.h"
 
 SDL_GameController* InputManager::controller = nullptr;
 InputManager::Control InputManager::control = InputManager::Control::Keyboard;
@@ -30,7 +31,7 @@ void InputManager::SetController(SDL_GameController* _controller)
 }
 
 // get current control method: keyboard / controller
-InputManager::Control InputManager::GetControl() const
+InputManager::Control InputManager::GetControl()
 {
     return control;
 }

@@ -77,8 +77,6 @@ void Game::Init(const char* title, int xPos, int yPos)
 void Game::SetUpLevel()
 {
 	// load game textures
-	//aManager->AddTexture("Map", "Assets/Overworld.png");
-
 	aManager->AddTexture("Player", "Assets/Player.png");
 
 	aManager->AddTexture("Enemy", "Assets/Enemy1.png");
@@ -87,20 +85,7 @@ void Game::SetUpLevel()
 
 	aManager->AddTexture("EnemyBullet", "Assets/EnemyBullet.png");
 
-	player = &eManager.AddEntity();
-
-	// add transform component for position and scale
-	player->AddComponent<TransformComponent>(960, 1000, 96, 96);
-
-	// add sprite component for rendering sprites
-	player->AddComponent<SpriteComponent>("Player");
-
-	// add player input component to allow the player to receive input
-	player->AddComponent<PlayerComponent>(5);
-
-	player->AddComponent<ColliderComponent>("Player");
-
-	player->AddGroup(groupPlayer);
+	SpawnPlayer();
 
 	SpawnEnemy();
 
@@ -109,8 +94,6 @@ void Game::SetUpLevel()
 	TextManager::AddText(960, 70, std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetHighScore())).c_str(), Game::aManager->GetFont("Normal"), "Record");
 
 	TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str(), Game::aManager->GetFont("Normal"), "Health");
-
-	//Map::LoadMap("Assets/test.map", 30, 30);
 	
 	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
 }
@@ -131,21 +114,36 @@ void Game::HandleEvents()
 	{
 		switch (event.type)
 		{
-		// close window
+		// close the window
 		case SDL_QUIT:
 			Clean();
 			GameManager::GetInstance().SetActiveGame(false);
 			break;
-		// when controller connected
+		// when the controller connected
 		case SDL_CONTROLLERDEVICEADDED:
 			InputManager::SetController(SDL_GameControllerOpen(0));
 			InputManager::SetControl(InputManager::Control::Controller);
 			break;
-		// when controller disconnected
+		// when the controller disconnected
 		case SDL_CONTROLLERDEVICEREMOVED:
 			SDL_GameControllerClose(InputManager::GetController());
 			InputManager::SetController(nullptr);
 			InputManager::SetControl(InputManager::Control::Keyboard);
+			break;
+		// when the player presses a key on the keyboard, switch control mode over to keyboard control
+		case SDL_KEYDOWN:
+			if (InputManager::GetControl() == InputManager::Control::Controller)
+			{
+				InputManager::SetControl(InputManager::Control::Keyboard);
+			}
+			break;
+		// when the player presses a button or pushes a joystick on the controller, switch control mode over to controller control
+		case SDL_CONTROLLERBUTTONDOWN:
+		case SDL_CONTROLLERAXISMOTION:
+			if (InputManager::GetControl() == InputManager::Control::Keyboard)
+			{
+				InputManager::SetControl(InputManager::Control::Controller);
+			}
 			break;
 		default:
 			break;
@@ -159,6 +157,12 @@ void Game::HandleEvents()
 			menu.Input();
 			break;
 		case GameManager::GameState::Playing:
+			break;
+		case GameManager::GameState::GameOver:
+			if (InputManager::GetKeyDown(InputManager::Action::Back))
+			{
+				Restart();
+			}
 			break;
 		default:
 			break;
@@ -201,6 +205,24 @@ void Game::Update()
 					GameManager::GetInstance().SaveGame();
 					GameManager::GetInstance().SetState(GameManager::GameState::GameOver);
 					TextManager::AddText(960, 540, TextManager::GetLocalizedText("Game Over"), Game::aManager->GetFont("Large"), "GameOver");
+
+
+					switch (InputManager::GetControl())
+					{
+					case InputManager::Control::Keyboard:
+						TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press ESC to restart"), Game::aManager->GetFont("Small"), "Restart");
+						break;
+					case InputManager::Control::Controller:
+						TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press A to restart"), Game::aManager->GetFont("Small"), "Restart");
+						break;
+					default:
+						break;
+					}
+
+					for (auto c : colliders)
+					{
+						c->entity->Destroy();
+					}
 				}
 			}
 		}
@@ -242,6 +264,7 @@ void Game::Update()
 		}
 		break;
 	case GameManager::GameState::GameOver:
+		eManager.Refresh();
 		break;
 	default:
 		break;
@@ -310,6 +333,28 @@ void Game::RemoveCollider(ColliderComponent* collider)
 	}
 }
 
+void Game::SpawnPlayer()
+{
+	player = &eManager.AddEntity();
+
+	// add transform component for position and scale
+	player->AddComponent<TransformComponent>(960, 1000, 96, 96);
+
+	// add sprite component for rendering sprites
+	player->AddComponent<SpriteComponent>("Player");
+
+	// add player input component to allow the player to receive input
+	player->AddComponent<PlayerComponent>(5);
+
+	player->AddComponent<ColliderComponent>("Player");
+
+	player->GetComponent<ColliderComponent>().SetDestroyCallback([this](ColliderComponent* collider) {
+		RemoveCollider(collider);
+		});
+
+	player->AddGroup(groupPlayer);
+}
+
 void Game::SpawnEnemy()
 {
 	for (int y = 0; y < 3; y++)
@@ -350,11 +395,24 @@ void Game::RemoveEnemy(Entity* enemy)
 		enemies.erase(it);
 	}
 
-	if (enemies.empty())
+	if (enemies.empty() && GameManager::GetInstance().GetState() == GameManager::GameState::Playing)
 	{
 		LevelManager::SetDifficulty(LevelManager::GetDifficulty() + 1);
 		EntityManager::GetInstance().QueueEntityToAdd([this]() {
 			SpawnEnemy();
 		});
 	}
+}
+
+void Game::Restart()
+{
+	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
+	TextManager::UnRegisterText("GameOver");
+	TextManager::UnRegisterText("Restart");
+	LevelManager::SetDifficulty(1);
+	SpawnPlayer();
+	SpawnEnemy();
+	TextManager::textArray["Health"]->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
+	GameManager::GetInstance().SetScore(0);
+	TextManager::textArray["Score"]->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
 }

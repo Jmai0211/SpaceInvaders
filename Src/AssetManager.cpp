@@ -52,6 +52,7 @@ void AssetManager::CreateProjectileInternal(Vector2D position, int direction, in
 	projectile.AddComponent<SpriteComponent>(id);
 	projectile.AddComponent<ProjectileComponent>(direction, speed);
 	projectile.AddComponent<ColliderComponent>("Projectile");
+	projectile.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
 	projectile.GetComponent<ColliderComponent>().SetDestroyCallback([this](ColliderComponent* collider) {
 		Game::RemoveCollider(collider);
 		});
