@@ -6,6 +6,7 @@
 class ColliderComponent;
 class GameManager;
 class AssetManager;
+class EntityManager;
 class Entity;
 class MainMenu;
 
@@ -31,7 +32,8 @@ public:
 
 	static void AddTile(int srcX, int srcY, int xPos, int yPos);
 
-	static void RemoveCollider(ColliderComponent* collider);
+	// stop the game and display game over message
+	void GameOver();
 
 	// reset all game data and re spawn player and enemies
 	void Restart();
@@ -41,10 +43,14 @@ public:
 
 	static std::vector<ColliderComponent*> colliders;
 	static AssetManager* aManager;
+	static EntityManager& eManager;
 	static MainMenu menu;
 	static Entity* player;
+
 private:
 	void SpawnPlayer();
 	void SpawnEnemy();
-	void RemoveEnemy(Entity* enemy);
+
+	// check if new set of enemies should be spawned
+	void CheckEnemySpawn();
 };

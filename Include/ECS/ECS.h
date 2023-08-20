@@ -7,6 +7,8 @@
 #include <array>
 #include <functional>
 #include "GameManager.h"
+#include <map>
+#include <string>
 
 class Component;
 class Entity;
@@ -50,7 +52,7 @@ public:
 class Entity
 {
 public:
-	Entity() 
+	Entity()
 	{
 		// Initialize componentArray with nullptr values
 		for (std::size_t i = 0; i < maxComponents; ++i)
@@ -67,6 +69,11 @@ public:
 		}
 	}
 
+	void SetDestroyEnemyCallback(std::function<void(Entity*)> callback)
+	{
+		destroyEnemyCallback = callback;
+	}
+
 	void Update()
 	{
 		for (auto& c : components) c->Update();
@@ -75,12 +82,6 @@ public:
 	void Render()
 	{
 		for (auto& c : components) c->Render();
-	}
-
-	// call back used to remove enemy pointer from game.h when the enemy is destroyed
-	void SetDestroyEnemyCallback(std::function<void(Entity*)> callback)
-	{
-		destroyEnemyCallback = callback;
 	}
 
 	bool IsActive() const { return active; }
@@ -149,12 +150,12 @@ public:
 
 	void Update()
 	{
-		for (auto& e : entityArray) e->Update();
+		for (auto& e : entityArray) e.second->Update();
 	}
 
 	void Render()
 	{
-		for (auto& e : entityArray) e->Render();
+		for (auto& e : entityArray) e.second->Render();
 	}
 
 	void Refresh()
@@ -172,12 +173,20 @@ public:
 		}
 
 		// if the entity is not active, remove it
-		entityArray.erase(std::remove_if(std::begin(entityArray), std::end(entityArray),
-			[](const std::unique_ptr<Entity>& mEntity)
+		for (auto it = entityArray.begin(); it != entityArray.end(); )
+		{
+			if (!it->second->IsActive())
 			{
-				return !mEntity->IsActive();
-			}),
-			std::end(entityArray));
+				// Erase the entity from the map and move the iterator to the next element
+				it = entityArray.erase(it);
+
+			}
+			else
+			{
+				// Move to the next element in the map
+				++it;
+			}
+		}
 	}
 
 	void AddToGroup(Entity* mEntity, Group mGroup)
@@ -190,13 +199,62 @@ public:
 		return groupedEntities[mGroup];
 	}
 
-	Entity& AddEntity()
+	Entity& AddEntity(std::string baseName) 
 	{
-		Entity* e = new Entity();
-		std::unique_ptr<Entity> uPtr{ e };
-		entityArray.emplace_back(std::move(uPtr));
+		std::string uniqueName = baseName;
+		int number = 1;
 
-		return *e;
+		// Keep incrementing the number until a unique name is found
+		while (entityArray.find(uniqueName) != entityArray.end()) 
+		{
+			uniqueName = baseName + std::to_string(number);
+			number++;
+		}
+
+		// Create the entity and add it to the map
+		entityArray.emplace(uniqueName, std::make_unique<Entity>());
+
+		return *entityArray[uniqueName];
+	}
+
+	// Function to find an entity by name
+	Entity* FindEntity(std::string entityName) 
+	{
+		auto it = entityArray.find(entityName);
+		if (it != entityArray.end()) {
+			return it->second.get();
+		}
+		return nullptr; // Entity not found
+	}
+
+	// Function to find all entities with names containing a certain substring
+	std::vector<Entity*> FindEntitiesWithSubstring(std::string substring) 
+	{
+		std::vector<Entity*> result;
+
+		for (const auto& pair : entityArray) 
+		{
+			if (pair.first.find(substring) != std::string::npos) 
+			{
+				result.push_back(pair.second.get());
+			}
+		}
+
+		return result;
+	}
+
+	std::string GetEntityID(Entity* entity)
+	{
+		for (const auto& pair : entityArray)
+		{
+			if (pair.second.get() == entity)
+			{
+				return pair.first;
+			}
+		}
+
+		// If not found, return an empty string or handle the error as needed
+		return "";
 	}
 
 	// Function to queue entity additions
@@ -228,8 +286,11 @@ private:
 	EntityManager(const EntityManager&) = delete; // Disable copy constructor
 	EntityManager& operator=(const EntityManager&) = delete; // Disable assignment operator
 
-	std::vector<std::unique_ptr<Entity>> entityArray;
+	std::map<std::string, std::unique_ptr<Entity>> entityArray;
+
 	std::array<std::vector<Entity*>, maxGroups> groupedEntities;
 
 	std::vector<std::function<void()>> entitiesToAddQueue;
+
+	std::function<void(Entity*)> destroyEnemyCallback;
 };

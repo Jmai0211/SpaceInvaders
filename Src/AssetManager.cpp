@@ -30,14 +30,11 @@ void AssetManager::CreateProjectile(Vector2D position, int direction, int speed,
 
 void AssetManager::CreateProjectileInternal(Vector2D position, int direction, int speed, std::string id)
 {
-	auto& projectile(EntityManager::GetInstance().AddEntity());
+	auto& projectile(EntityManager::GetInstance().AddEntity("Projectile"));
 	projectile.AddComponent<TransformComponent>(position.x, position.y, 64, 64, false);
 	projectile.AddComponent<SpriteComponent>(id);
 	projectile.AddComponent<ProjectileComponent>(direction, speed);
 	projectile.AddComponent<ColliderComponent>("Projectile");
 	projectile.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
-	projectile.GetComponent<ColliderComponent>().SetDestroyCallback([this](ColliderComponent* collider) {
-		Game::RemoveCollider(collider);
-		});
 	projectile.AddGroup(Game::groupProjectile);
 }

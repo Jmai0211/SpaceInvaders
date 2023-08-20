@@ -18,12 +18,9 @@ SDL_Window* Game::window = nullptr;
 
 MainMenu Game::menu;
 Map* map;
-EntityManager& eManager = EntityManager::GetInstance();
+EntityManager& Game::eManager = EntityManager::GetInstance();
 
 Entity* Game::player;
-std::vector<Entity*> enemies;
-
-std::vector<ColliderComponent*> Game::colliders;
 
 AssetManager* Game::aManager;
 
@@ -98,11 +95,38 @@ void Game::SetUpLevel()
 
 void Game::AddTile(int srcX, int srcY, int xPos, int yPos)
 {
-	auto& tile(eManager.AddEntity());
+	auto& tile(eManager.AddEntity("Tile"));
 
 	tile.AddComponent<TileComponent>(srcX, srcY, xPos, yPos, "Map");
 
 	tile.AddGroup(groupMap);
+}
+
+void Game::GameOver()
+{
+	GameManager::GetInstance().SaveGame();
+	GameManager::GetInstance().SetState(GameManager::GameState::GameOver);
+	TextManager::AddText(960, 540, TextManager::GetLocalizedText("Game Over"), TextManager::GetFont("Large"), "GameOver");
+
+	switch (InputManager::GetControl())
+	{
+	case InputManager::Control::Keyboard:
+		TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press ESC to restart"), TextManager::GetFont("Small"), "Restart");
+		break;
+	case InputManager::Control::Controller:
+		TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press A to restart"), TextManager::GetFont("Small"), "Restart");
+		break;
+	default:
+		break;
+	}
+
+	std::vector<Entity*> temp = eManager.FindEntitiesWithSubstring("");
+
+	// destroy all remaining entities
+	for (auto c : temp)
+	{
+		c->Destroy();
+	}
 }
 
 void Game::HandleEvents()
@@ -158,6 +182,7 @@ void Game::HandleEvents()
 
 void Game::Update()
 {
+	std::vector<Entity*> temp;
 	InputManager::InputHold();
 	switch (GameManager::GetInstance().GetState())
 	{
@@ -165,86 +190,7 @@ void Game::Update()
 		eManager.ProcessEntityAdditions();
 		eManager.Update();
 		eManager.Refresh();
-
-		// check for all collisions against the player
-		for (auto c : colliders)
-		{
-			// enemy bullet
-			if (!c->destroyed &&
-				CollisionManager::CheckCollision(player->GetComponent<ColliderComponent>(), *c) &&
-				c->tag == "Projectile" &&
-				c->entity->GetComponent<ProjectileComponent>().movementDirection < 0)
-			{
-				player->GetComponent<PlayerComponent>().SetHealth(player->GetComponent<PlayerComponent>().GetHealth() - 1);
-
-				TextManager::textArray["Health"]->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
-
-				c->destroyed = true;
-
-				c->entity->Destroy();
-
-				if (player->GetComponent<PlayerComponent>().GetHealth() <= 0)
-				{
-					GameManager::GetInstance().SaveGame();
-					GameManager::GetInstance().SetState(GameManager::GameState::GameOver);
-					TextManager::AddText(960, 540, TextManager::GetLocalizedText("Game Over"), TextManager::GetFont("Large"), "GameOver");
-
-
-					switch (InputManager::GetControl())
-					{
-					case InputManager::Control::Keyboard:
-						TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press ESC to restart"), TextManager::GetFont("Small"), "Restart");
-						break;
-					case InputManager::Control::Controller:
-						TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press A to restart"), TextManager::GetFont("Small"), "Restart");
-						break;
-					default:
-						break;
-					}
-
-					for (auto c : colliders)
-					{
-						c->entity->Destroy();
-					}
-				}
-			}
-		}
-
-		// check for all collisions against the enemies
-		for (size_t i = 0; i < enemies.size(); i++)
-		{
-			auto e = enemies[i];
-			for (size_t j = 0; j < colliders.size(); j++)
-			{
-				auto c = colliders[j];
-
-				// player bullet
-				if (!c->destroyed && 
-					CollisionManager::CheckCollision(enemies[i]->GetComponent<ColliderComponent>(), *c) && 
-					c->tag == "Projectile" && 
-					c->entity->GetComponent<ProjectileComponent>().movementDirection > 0)
-				{
-					c->destroyed = true; // Mark the bullet as used
-
-					c->entity->Destroy();
-
-					e->GetComponent<EnemyAIComponent>().health--;
-					if (e->GetComponent<EnemyAIComponent>().health <= 0)
-					{
-						e->Destroy();
-						// update score
-						GameManager::GetInstance().SetScore(GameManager::GetInstance().GetScore() + 1);
-						TextManager::textArray["Score"]->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
-
-						if (GameManager::GetInstance().GetScore() > GameManager::GetInstance().GetHighScore())
-						{
-							GameManager::GetInstance().SetHighScore(GameManager::GetInstance().GetScore());
-							TextManager::textArray["Record"]->UpdateText(std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
-						}
-					}
-				}
-			}
-		}
+		CollisionManager::Update();
 		break;
 	case GameManager::GameState::GameOver:
 		eManager.Refresh();
@@ -307,18 +253,9 @@ void Game::Clean()
 	SDL_Quit();
 }
 
-void Game::RemoveCollider(ColliderComponent* collider)
-{
-	auto it = std::find(colliders.begin(), colliders.end(), collider);
-	if (it != colliders.end())
-	{
-		colliders.erase(it);
-	}
-}
-
 void Game::SpawnPlayer()
 {
-	player = &eManager.AddEntity();
+	player = &eManager.AddEntity("Player");
 
 	// add transform component for position and scale
 	player->AddComponent<TransformComponent>(960, 1000, 96, 96);
@@ -331,10 +268,6 @@ void Game::SpawnPlayer()
 
 	player->AddComponent<ColliderComponent>("Player");
 
-	player->GetComponent<ColliderComponent>().SetDestroyCallback([this](ColliderComponent* collider) {
-		RemoveCollider(collider);
-		});
-
 	player->AddGroup(groupPlayer);
 }
 
@@ -345,8 +278,7 @@ void Game::SpawnEnemy()
 		for (int x = 0; x < 7; x++)
 		{
 			// Create a new enemy entity and store a reference to it in the vector
-			Entity& enemy = eManager.AddEntity();
-			enemies.push_back(&enemy);
+			Entity& enemy = eManager.AddEntity("Alien");
 
 			// Add a TransformComponent to the enemy entity
 			enemy.AddComponent<TransformComponent>(100 + x * 120, 200 + y * 120, 80, 80);
@@ -355,30 +287,21 @@ void Game::SpawnEnemy()
 
 			enemy.AddComponent<ColliderComponent>("Enemy");
 
-			enemy.GetComponent<ColliderComponent>().SetDestroyCallback([this](ColliderComponent* collider) {
-				RemoveCollider(collider);
-				});
+			enemy.AddComponent<EnemyAIComponent>(1 + static_cast<int>(LevelManager::GetDifficulty() / 5), 3 + LevelManager::GetDifficulty());
 
 			enemy.SetDestroyEnemyCallback([this](Entity* enemy) {
-				RemoveEnemy(enemy);
+				CheckEnemySpawn();
 				});
-
-			enemy.AddComponent<EnemyAIComponent>(1 + static_cast<int>(LevelManager::GetDifficulty() / 5), 3 + LevelManager::GetDifficulty());
 
 			enemy.AddGroup(groupEnemy);
 		}
 	}
 }
 
-void Game::RemoveEnemy(Entity* enemy)
+void Game::CheckEnemySpawn()
 {
-	auto it = std::find(enemies.begin(), enemies.end(), enemy);
-	if (it != enemies.end())
-	{
-		enemies.erase(it);
-	}
-
-	if (enemies.empty() && GameManager::GetInstance().GetState() == GameManager::GameState::Playing)
+	std::vector<Entity*> temp = eManager.FindEntitiesWithSubstring("Alien");
+	if (temp.empty() && GameManager::GetInstance().GetState() == GameManager::GameState::Playing)
 	{
 		LevelManager::SetDifficulty(LevelManager::GetDifficulty() + 1);
 		EntityManager::GetInstance().QueueEntityToAdd([this]() {

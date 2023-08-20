@@ -3,7 +3,6 @@
 #include "SDL.h"
 #include "Components.h"
 #include <functional>
-#include "Game.h"
 
 class ColliderComponent : public Component
 {
@@ -24,16 +23,6 @@ public:
 	~ColliderComponent()
 	{
 		SDL_DestroyTexture(texture);
-		if (destroyColliderCallback)
-		{
-			destroyColliderCallback(this);
-		}
-	}
-
-	// call back used to remove collider pointer from game.h when the collider is destroyed
-	void SetDestroyCallback(std::function<void(ColliderComponent*)> callback)
-	{
-		destroyColliderCallback = callback;
 	}
 
 	void Init() override
@@ -43,8 +32,6 @@ public:
 			entity->AddComponent<TransformComponent>();
 		}
 		transform = &entity->GetComponent<TransformComponent>();
-
-		Game::colliders.push_back(this);
 
 		srcRect.x = 0;
 		srcRect.y = 0;
@@ -85,6 +72,4 @@ private:
 	SDL_Rect destRect;
 	SDL_Rect srcRect;
 	bool collisionVisible = false;
-
-	std::function<void(ColliderComponent*)> destroyColliderCallback;
 };
