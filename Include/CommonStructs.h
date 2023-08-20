@@ -17,10 +17,13 @@ struct TextData
 
 // Data table for resolutions
 const Resolutions resolutionTable[] = {
-    {800, 600},
-    {1024, 768},
+    {640, 360},
+    {1024, 576},
     {1280, 720},
+	{1366, 768},
     {1920, 1080},
+	{2560, 1440},
+	{3840, 2160}
 };
 
 // Data table for text in different languages

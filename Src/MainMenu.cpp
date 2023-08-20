@@ -15,11 +15,11 @@ void MainMenu::SetUpMenu()
 {
 	GameManager::GetInstance().SetState(GameManager::GameState::Menu);
 	menuIndex = 1;
-	TextManager::AddText(960, 230, TextManager::GetLocalizedText("Space Invaders"), game->aManager->GetFont("Large"), "Title");
+	TextManager::AddText(960, 230, TextManager::GetLocalizedText("Space Invaders"), TextManager::GetFont("Large"), "Title");
 
-	TextManager::AddText(960, 500, TextManager::GetLocalizedText("Start Game"), game->aManager->GetFont("Normal"), "StartGame");
-	TextManager::AddText(960, 700, TextManager::GetLocalizedText("Options"), game->aManager->GetFont("Normal"), "Options");
-	TextManager::AddText(960, 900, TextManager::GetLocalizedText("Exit Game"), game->aManager->GetFont("Normal"), "ExitGame");
+	TextManager::AddText(960, 500, TextManager::GetLocalizedText("Start Game"), TextManager::GetFont("Normal"), "StartGame");
+	TextManager::AddText(960, 700, TextManager::GetLocalizedText("Options"), TextManager::GetFont("Normal"), "Options");
+	TextManager::AddText(960, 900, TextManager::GetLocalizedText("Exit Game"), TextManager::GetFont("Normal"), "ExitGame");
 
 	TextManager::textArray["StartGame"]->UpdateColor({ 255, 255, 0, 255 });
 }
@@ -189,15 +189,15 @@ void MainMenu::SetUpOptions()
 		}
 	}
 
-	TextManager::AddText(960, 230, TextManager::GetLocalizedText("Options"), game->aManager->GetFont("Large"), "OptionsTitle");
+	TextManager::AddText(960, 230, TextManager::GetLocalizedText("Options"), TextManager::GetFont("Large"), "OptionsTitle");
 
-	TextManager::AddText(650, 500, TextManager::GetLocalizedText("Language"), game->aManager->GetFont("Normal"), "LanguageTitle");
+	TextManager::AddText(650, 500, TextManager::GetLocalizedText("Language"), TextManager::GetFont("Normal"), "LanguageTitle");
 
-	TextManager::AddText(1250, 500, TextManager::GetLocalizedText("English"), game->aManager->GetFont("Normal"), "Language");
+	TextManager::AddText(1250, 500, TextManager::GetLocalizedText("English"), TextManager::GetFont("Normal"), "Language");
 
-	TextManager::AddText(650, 700, TextManager::GetLocalizedText("Resolution"), game->aManager->GetFont("Normal"), "ResolutionTitle");
+	TextManager::AddText(650, 700, TextManager::GetLocalizedText("Resolution"), TextManager::GetFont("Normal"), "ResolutionTitle");
 
-	TextManager::AddText(1250, 700, ConvertResolution(GameManager::GetInstance().GetResolution().first, GameManager::GetInstance().GetResolution().second), game->aManager->GetFont("Normal"), "Resolution");
+	TextManager::AddText(1250, 700, ConvertResolution(GameManager::GetInstance().GetResolution().first, GameManager::GetInstance().GetResolution().second), TextManager::GetFont("Normal"), "Resolution");
 
 	TextManager::textArray["Language"]->UpdateColor({ 255, 255, 0, 255 });
 }

@@ -31,7 +31,7 @@ void Game::Init(const char* title, int xPos, int yPos)
 {
 	// fullscreen information
 	int flags = 0;
-	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0)
+	if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
 	{
 		std::cout << "Subsystems initialized!" << std::endl;
 
@@ -58,11 +58,9 @@ void Game::Init(const char* title, int xPos, int yPos)
 
 		GameManager::GetInstance().SetActiveGame(true);
 
-		aManager = new AssetManager();
+		TextManager::Init();
 
-		aManager->AddFont("Small", "Assets/SmileySans-Oblique.ttf", 60);
-		aManager->AddFont("Normal", "Assets/SmileySans-Oblique.ttf", 96);
-		aManager->AddFont("Large", "Assets/SmileySans-Oblique.ttf", 144);
+		aManager = new AssetManager();
 
 		menu.SetUpMenu();
 
@@ -89,11 +87,11 @@ void Game::SetUpLevel()
 
 	SpawnEnemy();
 
-	TextManager::AddText(200, 70, std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str(), Game::aManager->GetFont("Normal"), "Score");
+	TextManager::AddText(200, 70, std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str(), TextManager::GetFont("Normal"), "Score");
 
-	TextManager::AddText(960, 70, std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetHighScore())).c_str(), Game::aManager->GetFont("Normal"), "Record");
+	TextManager::AddText(960, 70, std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetHighScore())).c_str(), TextManager::GetFont("Normal"), "Record");
 
-	TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str(), Game::aManager->GetFont("Normal"), "Health");
+	TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str(), TextManager::GetFont("Normal"), "Health");
 	
 	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
 }
@@ -189,16 +187,16 @@ void Game::Update()
 				{
 					GameManager::GetInstance().SaveGame();
 					GameManager::GetInstance().SetState(GameManager::GameState::GameOver);
-					TextManager::AddText(960, 540, TextManager::GetLocalizedText("Game Over"), Game::aManager->GetFont("Large"), "GameOver");
+					TextManager::AddText(960, 540, TextManager::GetLocalizedText("Game Over"), TextManager::GetFont("Large"), "GameOver");
 
 
 					switch (InputManager::GetControl())
 					{
 					case InputManager::Control::Keyboard:
-						TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press ESC to restart"), Game::aManager->GetFont("Small"), "Restart");
+						TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press ESC to restart"), TextManager::GetFont("Small"), "Restart");
 						break;
 					case InputManager::Control::Controller:
-						TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press A to restart"), Game::aManager->GetFont("Small"), "Restart");
+						TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press A to restart"), TextManager::GetFont("Small"), "Restart");
 						break;
 					default:
 						break;

@@ -3,13 +3,6 @@
 
 AssetManager::~AssetManager()
 {
-	for (auto f : fonts)
-	{
-		TTF_CloseFont(f.second);
-	}
-	fonts.clear();
-	TTF_Quit();
-
 	for (auto t : textures)
 	{
 		SDL_DestroyTexture(t.second);
@@ -25,16 +18,6 @@ void AssetManager::AddTexture(std::string id, const char* path)
 SDL_Texture* AssetManager::GetTexture(std::string id)
 {
 	return textures[id];
-}
-
-void AssetManager::AddFont(std::string id, std::string path, int fontSize)
-{
-	fonts.emplace(id, TTF_OpenFont(path.c_str(), fontSize));
-}
-
-TTF_Font* AssetManager::GetFont(std::string id)
-{
-	return fonts[id];
 }
 
 void AssetManager::CreateProjectile(Vector2D position, int direction, int speed, std::string id)
