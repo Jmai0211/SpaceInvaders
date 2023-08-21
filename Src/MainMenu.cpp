@@ -3,7 +3,6 @@
 #include "Game.h"
 #include <string>
 #include "CommonStructs.h"
-#include "TextureManager.h"
 #include "AssetManager.h"
 
 Game* MainMenu::game;
@@ -13,7 +12,7 @@ const char* languageText;
 // setup main menu
 void MainMenu::SetUpMenu()
 {
-	GameManager::GetInstance().SetState(GameManager::GameState::Menu);
+	GameManager::GetInstance().SetState(GameState::Menu);
 	menuIndex = 1;
 	TextManager::AddText(960, 230, TextManager::GetLocalizedText("Space Invaders"), TextManager::GetFont("Large"), "Title");
 
@@ -172,7 +171,7 @@ void MainMenu::OptionDown()
 // setup options menu
 void MainMenu::SetUpOptions()
 {
-	GameManager::GetInstance().SetState(GameManager::GameState::Option);
+	GameManager::GetInstance().SetState(GameState::Option);
 	UnsetMenu();
 
 	languageIndex = static_cast<int>(GameManager::GetInstance().GetLanguage());
@@ -229,10 +228,10 @@ void MainMenu::ChangeLanguage()
 	switch (languageIndex)
 	{
 	case 0:
-		GameManager::GetInstance().SetLanguage(GameManager::Language::English);
+		GameManager::GetInstance().SetLanguage(Language::English);
 		break;
 	case 1:
-		GameManager::GetInstance().SetLanguage(GameManager::Language::Chinese);
+		GameManager::GetInstance().SetLanguage(Language::Chinese);
 		break;
 	default:
 		break;

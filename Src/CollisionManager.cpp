@@ -3,7 +3,25 @@
 #include "ECS.h"
 #include "Game.h"
 
-Game* CollisionManager::game;
+CollisionManager& CollisionManager::GetInstance()
+{
+	static CollisionManager instance;
+	return instance;
+}
+
+void CollisionManager::AddCollider(ColliderComponent* entity)
+{
+	registeredEntities.push_back(entity);
+}
+
+void CollisionManager::RemoveCollider(ColliderComponent* entity)
+{
+	auto it = std::find(registeredEntities.begin(), registeredEntities.end(), entity);
+	if (it != registeredEntities.end())
+	{
+		registeredEntities.erase(it);
+	}
+}
 
 bool CollisionManager::CheckCollision(const SDL_Rect& object1, const SDL_Rect& object2)
 {
@@ -13,20 +31,12 @@ bool CollisionManager::CheckCollision(const SDL_Rect& object1, const SDL_Rect& o
 		   object2.y <= object1.y + object1.h;
 }
 
-bool CollisionManager::CheckCollision(const ColliderComponent& object1, const ColliderComponent& object2)
+bool CollisionManager::CheckCollision(ColliderComponent* object1, ColliderComponent* object2)
 {
-	// ignores collision with self
-	if (&object1 != &object2)
+	if (CheckCollision(object1->collider, object2->collider))
 	{
-		if (CheckCollision(object1.collider, object2.collider))
-		{
-			//std::cout << object1.tag << " hit " << object2.tag << std::endl;
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		//std::cout << object1.tag << " hit " << object2.tag << std::endl;
+		return true;
 	}
 	else
 	{
@@ -36,72 +46,16 @@ bool CollisionManager::CheckCollision(const ColliderComponent& object1, const Co
 
 void CollisionManager::Update()
 {
-	std::vector<Entity*> temp = game->eManager.FindEntitiesWithSubstring("");
-	Entity* player = game->eManager.FindEntity("Player");
-
-	// check for all collisions against the player
-	for (auto c : temp)
+	for (auto collider1 : registeredEntities)
 	{
-		// enemy bullet
-		if (c->hasComponent<ColliderComponent>())
+		for (auto collider2 : registeredEntities)
 		{
-			auto& collider = c->GetComponent<ColliderComponent>();
-			if (!collider.destroyed &&
-				CollisionManager::CheckCollision(player->GetComponent<ColliderComponent>(), collider) &&
-				collider.tag == "Projectile" &&
-				collider.entity->GetComponent<ProjectileComponent>().movementDirection < 0)
+			if (collider1->entity->IsActive() && collider2->entity->IsActive() && collider1 != collider2)
 			{
-				player->GetComponent<PlayerComponent>().SetHealth(player->GetComponent<PlayerComponent>().GetHealth() - 1);
-
-				TextManager::textArray["Health"]->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
-
-				collider.destroyed = true;
-
-				collider.entity->Destroy();
-
-				if (player->GetComponent<PlayerComponent>().GetHealth() <= 0)
+				if (CheckCollision(collider1, collider2))
 				{
-					game->GameOver();
-				}
-
-			}
-		}
-
-		// check for all collisions against the enemies
-		for (size_t i = 0; i < temp.size(); i++)
-		{
-			auto e = temp[i];
-			if (e->hasComponent<EnemyAIComponent>())
-			{
-				for (size_t j = i + 1; j < temp.size(); j++)
-				{
-					auto& collider = c->GetComponent<ColliderComponent>();
-
-					// player bullet
-					if (!collider.destroyed &&
-						CollisionManager::CheckCollision(temp[i]->GetComponent<ColliderComponent>(), collider) &&
-						collider.tag == "Projectile" &&
-						collider.entity->GetComponent<ProjectileComponent>().movementDirection > 0)
-					{
-						collider.destroyed = true; // Mark the bullet as used
-
-						collider.entity->Destroy();
-
-						e->GetComponent<EnemyAIComponent>().health--;
-						if (e->GetComponent<EnemyAIComponent>().health <= 0)
-						{
-							e->Destroy();
-							// update score
-							GameManager::GetInstance().SetScore(GameManager::GetInstance().GetScore() + 1);
-							TextManager::textArray["Score"]->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
-
-							if (GameManager::GetInstance().GetScore() > GameManager::GetInstance().GetHighScore())
-							{
-								GameManager::GetInstance().SetHighScore(GameManager::GetInstance().GetScore());
-								TextManager::textArray["Record"]->UpdateText(std::string(TextManager::GetLocalizedText("Record: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
-							}
-						}
-					}
+					collider1->OnCollision(collider2->tag);
+					collider2->OnCollision(collider1->tag);
 				}
 			}
 		}

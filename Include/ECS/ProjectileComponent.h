@@ -1,5 +1,6 @@
 #pragma once
 #include "Components.h"
+#include "ColliderComponent.h"
 
 class ProjectileComponent : public Component
 {
@@ -29,6 +30,27 @@ public:
 		else
 		{
 			transform->Position.y -= movementDirection * speed;
+		}
+	}
+
+	void OnCollision(CollisionTag _tag, CollisionTag _otherTag)
+	{
+		switch (_otherTag)
+		{
+		case CollisionTag::Player:
+			if (_tag == CollisionTag::EnemyBullet)
+			{
+				entity->Destroy();
+			}
+			break;
+		case CollisionTag::Enemy:
+			if (_tag == CollisionTag::PlayerBullet)
+			{
+				entity->Destroy();
+			}
+			break;
+		default:
+			break;
 		}
 	}
 

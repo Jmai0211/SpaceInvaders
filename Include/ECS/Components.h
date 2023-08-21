@@ -7,3 +7,4 @@
 #include "TileComponent.h"
 #include "EnemyAIComponent.h"
 #include "ProjectileComponent.h"
+#include "Enums.h"

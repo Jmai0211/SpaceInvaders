@@ -1,7 +1,6 @@
 #pragma once
 #include "Components.h"
 #include "SDL.h"
-#include "TextureManager.h"
 #include "Animation.h"
 #include <map>
 #include "AssetManager.h"
@@ -54,7 +53,7 @@ public:
 
 	void SetTexture(std::string id)
 	{
-		texture = Game::aManager->GetTexture(id);
+		texture = AssetManager::GetInstance().GetTexture(id);
 	}
 
 	void Init() override
@@ -81,7 +80,7 @@ public:
 
 	void Render() override
 	{
-		TextureManager::Render(texture, srcRect, destRect);
+		AssetManager::GetInstance().Render(texture, srcRect, destRect);
 	}
 
 	void Play(const char* animName)

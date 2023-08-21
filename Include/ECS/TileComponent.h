@@ -36,11 +36,11 @@ public:
 		destRect.w = static_cast<int>(std::round(64 * scale));
 		destRect.h = static_cast<int>(std::round(64 * scale));
 		
-		texture = Game::aManager->GetTexture(id);
+		texture = AssetManager::GetInstance().GetTexture(id);
 	}
 
 	void Render() override
 	{
-		TextureManager::Render(texture, srcRect, destRect);
+		AssetManager::GetInstance().Render(texture, srcRect, destRect);
 	}
 };

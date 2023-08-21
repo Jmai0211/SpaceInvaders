@@ -4,9 +4,18 @@
 class LevelManager
 {
 public: 
-	static int GetDifficulty();
-	static void SetDifficulty(int _difficulty);
+	static LevelManager& GetInstance();
+	int GetDifficulty();
+	void SetDifficulty(int _difficulty);
+
+	void SpawnEnemy();
 
 private:
-	static int difficulty;
+	LevelManager() = default;
+	~LevelManager() = default;
+	LevelManager(const LevelManager&) = delete;
+	LevelManager& operator=(const LevelManager&) = delete;
+
+	int difficulty = 0;
+	void CheckEnemySpawn();
 };

@@ -1,22 +1,38 @@
 #pragma once
 #include "SDL.h"
+#include <vector>
 
 class ColliderComponent;
+class Entity;
 class Game;
 
 class CollisionManager
 {
 public:
+	static CollisionManager& GetInstance();
+
+	void AddCollider(ColliderComponent* entity);
+	void RemoveCollider(ColliderComponent* entity);
+
 	// function to check box collision
-	static bool CheckCollision(const SDL_Rect& object1, const SDL_Rect& object2);
+	bool CheckCollision(const SDL_Rect& object1, const SDL_Rect& object2);
 
 	// function to take two colliders and check box collision
-	static bool CheckCollision(const ColliderComponent& object1, const ColliderComponent& object2);
+	bool CheckCollision(ColliderComponent* object1, ColliderComponent* object2);
 
 	// function to check all collisions
-	static void Update();
+	void Update();
 
 private:
-	static Game* game;
+	CollisionManager() {
+		// Private constructor to prevent direct instantiation
+		// Initialization code here
+	}
+
+	CollisionManager(const CollisionManager&) = delete; // Disable copy constructor
+	CollisionManager& operator=(const CollisionManager&) = delete; // Disable assignment operator
+	Game* game;
+
+	std::vector<ColliderComponent*> registeredEntities;
 };
 

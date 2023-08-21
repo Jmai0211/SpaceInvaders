@@ -143,7 +143,8 @@ private:
 class EntityManager
 {
 public:
-	static EntityManager& GetInstance() {
+	static EntityManager& GetInstance() 
+	{
 		static EntityManager instance;
 		return instance;
 	}
@@ -243,6 +244,23 @@ public:
 		return result;
 	}
 
+	// Function to find all entities with a specified component
+	template <typename T>
+	std::vector<Entity*> FindEntitiesWithComponent() 
+	{
+		std::vector<Entity*> result;
+
+		for (const auto& pair : entityArray) 
+		{
+			if (pair.second->hasComponent<T>()) 
+			{
+				result.push_back(pair.second.get());
+			}
+		}
+
+		return result;
+	}
+
 	std::string GetEntityID(Entity* entity)
 	{
 		for (const auto& pair : entityArray)
@@ -257,26 +275,6 @@ public:
 		return "";
 	}
 
-	// Function to queue entity additions
-	// use this for creating entities in update
-	void QueueEntityToAdd(std::function<void()> createFunction)
-	{
-		if (GameManager::GetInstance().GetActiveGame())
-		{
-			entitiesToAddQueue.push_back(createFunction);
-		}
-	}
-
-	// Process the entity addition queue
-	void ProcessEntityAdditions()
-	{
-		for (auto& createFunction : entitiesToAddQueue)
-		{
-			createFunction();
-		}
-		entitiesToAddQueue.clear();
-	}
-
 private:
 	EntityManager() {
 		// Private constructor to prevent direct instantiation
@@ -289,8 +287,6 @@ private:
 	std::map<std::string, std::unique_ptr<Entity>> entityArray;
 
 	std::array<std::vector<Entity*>, maxGroups> groupedEntities;
-
-	std::vector<std::function<void()>> entitiesToAddQueue;
 
 	std::function<void(Entity*)> destroyEnemyCallback;
 };

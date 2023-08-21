@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include "Game.h"
-#include "TextureManager.h"
 #include "InputManager.h"
 #include "LevelManager.h"
 #include "TextManager.h"
@@ -18,11 +17,11 @@ SDL_Window* Game::window = nullptr;
 
 MainMenu Game::menu;
 Map* map;
-EntityManager& Game::eManager = EntityManager::GetInstance();
+EntityManager& eManager = EntityManager::GetInstance();
 
 Entity* Game::player;
 
-AssetManager* Game::aManager;
+AssetManager& aManager = AssetManager::GetInstance();
 
 void Game::Init(const char* title, int xPos, int yPos)
 {
@@ -57,8 +56,6 @@ void Game::Init(const char* title, int xPos, int yPos)
 
 		TextManager::Init();
 
-		aManager = new AssetManager();
-
 		menu.SetUpMenu();
 
 		SDL_FreeSurface(iconSurface);
@@ -72,17 +69,17 @@ void Game::Init(const char* title, int xPos, int yPos)
 void Game::SetUpLevel()
 {
 	// load game textures
-	aManager->AddTexture("Player", "Assets/Player.png");
+	aManager.AddTexture("Player", "Assets/Player.png");
 
-	aManager->AddTexture("Enemy", "Assets/Enemy1.png");
+	aManager.AddTexture("Enemy", "Assets/Enemy1.png");
 
-	aManager->AddTexture("PlayerBullet", "Assets/PlayerBullet.png");
+	aManager.AddTexture("PlayerBullet", "Assets/PlayerBullet.png");
 
-	aManager->AddTexture("EnemyBullet", "Assets/EnemyBullet.png");
+	aManager.AddTexture("EnemyBullet", "Assets/EnemyBullet.png");
 
 	SpawnPlayer();
 
-	SpawnEnemy();
+	LevelManager::GetInstance().SpawnEnemy();
 
 	TextManager::AddText(200, 70, std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str(), TextManager::GetFont("Normal"), "Score");
 
@@ -90,7 +87,7 @@ void Game::SetUpLevel()
 
 	TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str(), TextManager::GetFont("Normal"), "Health");
 	
-	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
+	GameManager::GetInstance().SetState(GameState::Playing);
 }
 
 void Game::AddTile(int srcX, int srcY, int xPos, int yPos)
@@ -99,13 +96,13 @@ void Game::AddTile(int srcX, int srcY, int xPos, int yPos)
 
 	tile.AddComponent<TileComponent>(srcX, srcY, xPos, yPos, "Map");
 
-	tile.AddGroup(groupMap);
+	tile.AddGroup(Tile);
 }
 
 void Game::GameOver()
 {
 	GameManager::GetInstance().SaveGame();
-	GameManager::GetInstance().SetState(GameManager::GameState::GameOver);
+	GameManager::GetInstance().SetState(GameState::GameOver);
 	TextManager::AddText(960, 540, TextManager::GetLocalizedText("Game Over"), TextManager::GetFont("Large"), "GameOver");
 
 	switch (InputManager::GetControl())
@@ -186,13 +183,12 @@ void Game::Update()
 	InputManager::InputHold();
 	switch (GameManager::GetInstance().GetState())
 	{
-	case GameManager::GameState::Playing:
-		eManager.ProcessEntityAdditions();
-		eManager.Update();
+	case GameState::Playing:
 		eManager.Refresh();
-		CollisionManager::Update();
+		eManager.Update();
+		CollisionManager::GetInstance().Update();
 		break;
-	case GameManager::GameState::GameOver:
+	case GameState::GameOver:
 		eManager.Refresh();
 		break;
 	default:
@@ -204,17 +200,17 @@ void Game::Render()
 {
 	SDL_RenderClear(renderer);
 
-	auto& tilesGroup(eManager.GetGroup(groupMap));
-	auto& enemyGroup(eManager.GetGroup(groupEnemy));
-	auto& playerGroup(eManager.GetGroup(groupPlayer));
-	auto& projectileGroup(eManager.GetGroup(groupProjectile));
+	auto& tilesGroup(eManager.GetGroup(Tile));
+	auto& enemyGroup(eManager.GetGroup(Enemy));
+	auto& playerGroup(eManager.GetGroup(Player));
+	auto& projectileGroup(eManager.GetGroup(Projectile));
 
 	switch (GameManager::GetInstance().GetState())
 	{
-	case GameManager::GameState::Menu:
-	case GameManager::GameState::Option:
+	case GameState::Menu:
+	case GameState::Option:
 		break;
-	case GameManager::GameState::Playing:
+	case GameState::Playing:
 		for (auto& t : tilesGroup)
 		{
 			t->Render();
@@ -232,7 +228,7 @@ void Game::Render()
 			p->Render();
 		}
 		break;
-	case GameManager::GameState::GameOver:
+	case GameState::GameOver:
 		break;
 	default:
 		break;
@@ -247,7 +243,6 @@ void Game::Render()
 // destroyed created instances and close window
 void Game::Clean()
 {
-	delete aManager;
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
@@ -266,58 +261,19 @@ void Game::SpawnPlayer()
 	// add player input component to allow the player to receive input
 	player->AddComponent<PlayerComponent>(5);
 
-	player->AddComponent<ColliderComponent>("Player");
+	player->AddComponent<ColliderComponent>(CollisionTag::Player);
 
-	player->AddGroup(groupPlayer);
-}
-
-void Game::SpawnEnemy()
-{
-	for (int y = 0; y < 3; y++)
-	{
-		for (int x = 0; x < 7; x++)
-		{
-			// Create a new enemy entity and store a reference to it in the vector
-			Entity& enemy = eManager.AddEntity("Alien");
-
-			// Add a TransformComponent to the enemy entity
-			enemy.AddComponent<TransformComponent>(100 + x * 120, 200 + y * 120, 80, 80);
-
-			enemy.AddComponent<SpriteComponent>("Enemy");
-
-			enemy.AddComponent<ColliderComponent>("Enemy");
-
-			enemy.AddComponent<EnemyAIComponent>(1 + static_cast<int>(LevelManager::GetDifficulty() / 5), 3 + LevelManager::GetDifficulty());
-
-			enemy.SetDestroyEnemyCallback([this](Entity* enemy) {
-				CheckEnemySpawn();
-				});
-
-			enemy.AddGroup(groupEnemy);
-		}
-	}
-}
-
-void Game::CheckEnemySpawn()
-{
-	std::vector<Entity*> temp = eManager.FindEntitiesWithSubstring("Alien");
-	if (temp.empty() && GameManager::GetInstance().GetState() == GameManager::GameState::Playing)
-	{
-		LevelManager::SetDifficulty(LevelManager::GetDifficulty() + 1);
-		EntityManager::GetInstance().QueueEntityToAdd([this]() {
-			SpawnEnemy();
-		});
-	}
+	player->AddGroup(Player);
 }
 
 void Game::Restart()
 {
-	GameManager::GetInstance().SetState(GameManager::GameState::Playing);
+	GameManager::GetInstance().SetState(GameState::Playing);
 	TextManager::UnRegisterText("GameOver");
 	TextManager::UnRegisterText("Restart");
-	LevelManager::SetDifficulty(1);
+	LevelManager::GetInstance().SetDifficulty(1);
 	SpawnPlayer();
-	SpawnEnemy();
+	LevelManager::GetInstance().SpawnEnemy();
 	TextManager::textArray["Health"]->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
 	GameManager::GetInstance().SetScore(0);
 	TextManager::textArray["Score"]->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());

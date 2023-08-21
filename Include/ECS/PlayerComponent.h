@@ -75,8 +75,32 @@ public:
 	{
 		if (SDL_GetTicks() - lastFireTime >= 300)
 		{
-			Game::aManager->CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, bulletSpeed, "PlayerBullet");
+			AssetManager::GetInstance().CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, bulletSpeed, "PlayerBullet", CollisionTag::PlayerBullet);
 			lastFireTime = SDL_GetTicks();
+		}
+	}
+
+	void OnCollision(CollisionTag _tag)
+	{
+		switch (_tag)
+		{
+		case CollisionTag::Enemy:
+			break;
+		case CollisionTag::EnemyBullet:
+			health--;
+
+			TextManager::textArray["Health"]->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(health)).c_str());
+
+			// game over
+			if (health <= 0)
+			{
+				Game::GameOver();
+			}
+			break;
+		case CollisionTag::Tile:
+			break;
+		default:
+			break;
 		}
 	}
 

@@ -74,10 +74,10 @@ const char* TextManager::GetLocalizedText(const char* element)
 		{
 			switch (GameManager::GetInstance().GetLanguage())
 			{
-			case GameManager::Language::English:
+			case Language::English:
 				return textDataTable[i].englishText;
 				break;
-			case GameManager::Language::Chinese:
+			case Language::Chinese:
 				return textDataTable[i].chineseText;
 				break;
 			default:

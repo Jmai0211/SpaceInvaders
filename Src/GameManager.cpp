@@ -5,17 +5,17 @@
 #include <string>
 #include <Game.h>
 
-GameManager GameManager::instance;
 int GameManager::score = 0;
 int GameManager::highScore = 0;
 bool GameManager::activeGame = false;
-GameManager::GameState GameManager::state = GameManager::GameState::Menu;
-GameManager::Language GameManager::language = GameManager::Language::English;
+GameState GameManager::state = GameState::Menu;
+Language GameManager::language = Language::English;
 std::pair<int, int> GameManager::resolution = std::make_pair(1920, 1080);
 
 // return instance of game manager
 GameManager& GameManager::GetInstance()
 {
+    static GameManager instance;
 	return instance;
 }
 
@@ -54,7 +54,7 @@ void GameManager::SetActiveGame(bool _activeGame)
 }
 
 // get current state of the game
-GameManager::GameState GameManager::GetState() const
+GameState GameManager::GetState() const
 {
 	return state;
 }
@@ -66,7 +66,7 @@ void GameManager::SetState(GameState _state)
 }
 
 // get current game language
-GameManager::Language GameManager::GetLanguage() const
+Language GameManager::GetLanguage() const
 {
 	return language;
 }
@@ -165,7 +165,7 @@ void GameManager::LoadSettings()
     file.close();
 
     // Set the loaded settings in the game manager
-    GameManager::GetInstance().SetLanguage(static_cast<GameManager::Language>(language));
+    GameManager::GetInstance().SetLanguage(static_cast<Language>(language));
     GameManager::GetInstance().SetResolution(width, height);
 }
 

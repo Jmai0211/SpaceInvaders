@@ -50,7 +50,7 @@ void InputManager::InputKeyDown()
 {
     switch (GameManager::GetInstance().GetState())
     {
-    case GameManager::GameState::Menu:
+    case GameState::Menu:
         if (GetKey(Action::Confirm))
         {
             game->menu.MenuConfirm();
@@ -64,7 +64,7 @@ void InputManager::InputKeyDown()
             game->menu.MenuDown();
         }
         break;
-    case GameManager::GameState::Option:
+    case GameState::Option:
         if (GetKey(Action::Back))
         {
             game->menu.OptionBack();
@@ -86,9 +86,9 @@ void InputManager::InputKeyDown()
             game->menu.OptionDown();
         }
         break;
-    case GameManager::GameState::Playing:
+    case GameState::Playing:
         break;
-    case GameManager::GameState::GameOver:
+    case GameState::GameOver:
         if (GetKey(Action::Back))
         {
             game->Restart();
@@ -103,17 +103,17 @@ void InputManager::InputKeyUp()
 {
     switch (GameManager::GetInstance().GetState())
     {
-    case GameManager::GameState::Menu:
+    case GameState::Menu:
         break;
-    case GameManager::GameState::Option:
+    case GameState::Option:
         break;
-    case GameManager::GameState::Playing:
+    case GameState::Playing:
         if (!GetKey(Action::LeftMovement) && !GetKey(Action::RightMovement))
         {
             game->player->GetComponent<PlayerComponent>().HorizontalMovement(0);
         }
         break;
-    case GameManager::GameState::GameOver:
+    case GameState::GameOver:
         break;
     default:
         break;
@@ -124,11 +124,11 @@ void InputManager::InputHold()
 {
     switch (GameManager::GetInstance().GetState())
     {
-    case GameManager::GameState::Menu:
+    case GameState::Menu:
         break;
-    case GameManager::GameState::Option:
+    case GameState::Option:
         break;
-    case GameManager::GameState::Playing:
+    case GameState::Playing:
         if (GetKey(Action::LeftMovement))
         {
             game->player->GetComponent<PlayerComponent>().HorizontalMovement(-1);
@@ -147,7 +147,7 @@ void InputManager::InputHold()
             game->player->GetComponent<PlayerComponent>().Attack();
         }
         break;
-    case GameManager::GameState::GameOver:
+    case GameState::GameOver:
         break;
     default:
         break;

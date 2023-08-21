@@ -2,24 +2,11 @@
 #include "SDL.h"
 #include <utility>
 #include "CommonStructs.h"
+#include "Enums.h"
 
 class GameManager
 {
 public:
-	enum class GameState
-	{
-		Menu,
-		Option,
-		Playing,
-		GameOver
-	};
-
-	enum class Language
-	{
-		English,
-		Chinese
-	};
-
 	static GameManager& GetInstance();
 
 	int GetScore() const;
@@ -53,8 +40,6 @@ private:
 	~GameManager() = default;
 	GameManager(const GameManager&) = delete;
 	GameManager& operator=(const GameManager&) = delete;
-
-	static GameManager instance;
 
 	static int score;
 	static int highScore;
