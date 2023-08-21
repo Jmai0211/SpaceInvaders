@@ -4,43 +4,38 @@
 #include "Components.h"
 
 SDL_GameController* InputManager::controller = nullptr;
-InputManager::Control InputManager::control = InputManager::Control::Keyboard;
+Control InputManager::control = Control::Keyboard;
 
 Game* InputManager::game;
 
-// get if input key is pressed
 bool InputManager::GetKey(Action _action)
 {
     switch (control)
     {
-    case InputManager::Control::Keyboard:
+    case Control::Keyboard:
         return KeyboardInput(_action);
-    case InputManager::Control::Controller:
+    case Control::Controller:
         return ControllerInput(_action);
     default:
         return false;
     }
 }
 
-// return the connected controller, nullptr if no connected controller
 SDL_GameController* InputManager::GetController()
 {
     return controller;
 }
 
-// set controller reference
 void InputManager::SetController(SDL_GameController* _controller)
 {
     controller = _controller;
 }
 
-// get current control method: keyboard / controller
-InputManager::Control InputManager::GetControl()
+Control InputManager::GetControl()
 {
     return control;
 }
 
-// update current control method
 void InputManager::SetControl(Control _control)
 {
     control = _control;
@@ -87,6 +82,10 @@ void InputManager::InputKeyDown()
         }
         break;
     case GameState::Playing:
+        if (GetKey(Action::Back))
+        {
+            game->BackToMainMenu();
+        }
         break;
     case GameState::GameOver:
         if (GetKey(Action::Back))
@@ -154,7 +153,6 @@ void InputManager::InputHold()
     }
 }
 
-// handle keyboard input
 bool InputManager::KeyboardInput(Action _action)
 {
     const Uint8* keyState = SDL_GetKeyboardState(nullptr);
@@ -187,7 +185,6 @@ bool InputManager::KeyboardInput(Action _action)
     }
 }
 
-// handle controller input
 bool InputManager::ControllerInput(Action _action)
 {
     if (controller != nullptr)

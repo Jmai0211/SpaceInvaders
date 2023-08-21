@@ -3,40 +3,46 @@
 #include <iostream>
 #include <vector>
 
-class ColliderComponent;
-class GameManager;
-class AssetManager;
-class EntityManager;
 class Entity;
 class MainMenu;
 
 class Game
 {
 public:
+	// Initialize sub systems
 	void Init(const char* title, int xPos, int yPos);
 
+	// Handle input events
 	void HandleEvents();
+
+	// Handle main game loop
 	void Update();
+
+	// Render all objects
 	void Render();
+
+	// Clean up game
 	void Clean();
 
+	// Setup gameplay level
 	void SetUpLevel();
 
-	static void AddTile(int srcX, int srcY, int xPos, int yPos);
+	// Return to main menu from game
+	void BackToMainMenu();
 
-	// stop the game and display game over message
+	// Stop the game and display game over message
 	static void GameOver();
 
-	// reset all game data and re spawn player and enemies
+	// Reset all game data and respawn player and enemies
 	void Restart();
 
 	static SDL_Renderer* renderer;
 	static SDL_Window* window;
 
-	static std::vector<ColliderComponent*> colliders;
 	static MainMenu menu;
 	static Entity* player;
 
 private:
+	// Spawn player
 	void SpawnPlayer();
 };

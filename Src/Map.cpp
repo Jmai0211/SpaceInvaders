@@ -2,6 +2,8 @@
 #include "Game.h"
 #include <fstream>
 #include <sstream>
+#include "ECS.h"
+#include "TileComponent.h"
 
 Map::Map()
 {
@@ -42,9 +44,18 @@ void Map::LoadMap(std::string path, int sizeX, int sizeY)
             int tileX = columnIndex * 64;
             int tileY = rowIndex * 64;
 
-            Game::AddTile(tileX, tileY, x * 64, y * 64);
+            AddTile(tileX, tileY, x * 64, y * 64);
         }
     }
 
     mapFile.close();
+}
+
+void Map::AddTile(int srcX, int srcY, int xPos, int yPos)
+{
+    auto& tile(EntityManager::GetInstance().AddEntity("Tile"));
+
+    tile.AddComponent<TileComponent>(srcX, srcY, xPos, yPos, "Map");
+
+    tile.AddGroup(Tile);
 }

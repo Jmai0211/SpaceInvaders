@@ -13,10 +13,14 @@ public:
 	Text(int x, int y, const char* _text, TTF_Font* _font);
 	~Text();
 
+	// Update the content of the text entity
 	void UpdateText(const char* _text);
+	// Update the color of the text entity
 	void UpdateColor(SDL_Color color);
+	// Render the text entity
 	void render();
 
+	// Update the size of the text entity
 	void SetScale(int x, int y);
 
 private:
@@ -26,6 +30,7 @@ private:
 	SDL_Texture* texture;
 	SDL_Color textColor;
 
+	// Generate a texture of the text to be rendered
 	void GenerateTexture();
 };
 

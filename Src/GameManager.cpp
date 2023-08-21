@@ -5,13 +5,6 @@
 #include <string>
 #include <Game.h>
 
-int GameManager::score = 0;
-int GameManager::highScore = 0;
-bool GameManager::activeGame = false;
-GameState GameManager::state = GameState::Menu;
-Language GameManager::language = Language::English;
-std::pair<int, int> GameManager::resolution = std::make_pair(1920, 1080);
-
 // return instance of game manager
 GameManager& GameManager::GetInstance()
 {

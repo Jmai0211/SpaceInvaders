@@ -15,20 +15,20 @@ public:
 	// Initialize TTF system and add fonts to the pool to be used
 	static void Init();
 
-	// add fonts to be used
+	// Sdd fonts to be used
 	static void AddFont(std::string id, std::string path, int fontSize);
-	// return the font for adding text
+	// Return the font for adding text
 	static TTF_Font* GetFont(std::string id);
 
-	// render text
+	// Render text
 	static void Render();
 
-	// add text to the array
+	// Add text to the array
 	static void AddText(int x, int y, const char* text, TTF_Font* _font, std::string id);
-	// remove text
+	// Remove text
 	static void UnRegisterText(std::string id);
 
-	// get the text in the correct language
+	// Return the text in the current game language
 	static const char* GetLocalizedText(const char* element);
 
 	static std::map<std::string, Text*> textArray;

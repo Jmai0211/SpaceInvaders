@@ -16,7 +16,6 @@ SDL_Renderer* Game::renderer = nullptr;
 SDL_Window* Game::window = nullptr;
 
 MainMenu Game::menu;
-Map* map;
 EntityManager& eManager = EntityManager::GetInstance();
 
 Entity* Game::player;
@@ -90,13 +89,25 @@ void Game::SetUpLevel()
 	GameManager::GetInstance().SetState(GameState::Playing);
 }
 
-void Game::AddTile(int srcX, int srcY, int xPos, int yPos)
+void Game::BackToMainMenu()
 {
-	auto& tile(eManager.AddEntity("Tile"));
+	TextManager::UnRegisterText("Score");
+	TextManager::UnRegisterText("Record");
+	TextManager::UnRegisterText("Health");
+	TextManager::insertionOrder.clear();
 
-	tile.AddComponent<TileComponent>(srcX, srcY, xPos, yPos, "Map");
+	std::vector<Entity*> temp = eManager.FindEntitiesWithSubstring("");
+	// destroy all remaining entities
+	for (auto c : temp)
+	{
+		c->Destroy();
+	}
 
-	tile.AddGroup(Tile);
+	GameManager::GetInstance().SetScore(0);
+
+	menu.SetUpMenu();
+	
+	GameManager::GetInstance().SetState(GameState::Menu);
 }
 
 void Game::GameOver()
@@ -107,10 +118,10 @@ void Game::GameOver()
 
 	switch (InputManager::GetControl())
 	{
-	case InputManager::Control::Keyboard:
+	case Control::Keyboard:
 		TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press ESC to restart"), TextManager::GetFont("Small"), "Restart");
 		break;
-	case InputManager::Control::Controller:
+	case Control::Controller:
 		TextManager::AddText(960, 680, TextManager::GetLocalizedText("Press A to restart"), TextManager::GetFont("Small"), "Restart");
 		break;
 	default:
@@ -141,28 +152,28 @@ void Game::HandleEvents()
 		// when the controller connected
 		case SDL_CONTROLLERDEVICEADDED:
 			InputManager::SetController(SDL_GameControllerOpen(0));
-			InputManager::SetControl(InputManager::Control::Controller);
+			InputManager::SetControl(Control::Controller);
 			break;
 		// when the controller disconnected
 		case SDL_CONTROLLERDEVICEREMOVED:
 			SDL_GameControllerClose(InputManager::GetController());
 			InputManager::SetController(nullptr);
-			InputManager::SetControl(InputManager::Control::Keyboard);
+			InputManager::SetControl(Control::Keyboard);
 			break;
 		// when the player presses a key on the keyboard, switch control mode over to keyboard control
 		case SDL_KEYDOWN:
-			if (InputManager::GetControl() == InputManager::Control::Controller)
+			if (InputManager::GetControl() == Control::Controller)
 			{
-				InputManager::SetControl(InputManager::Control::Keyboard);
+				InputManager::SetControl(Control::Keyboard);
 			}
 			InputManager::InputKeyDown();
 			break;
 		// when the player presses a button or pushes a joystick on the controller, switch control mode over to controller control
 		case SDL_CONTROLLERBUTTONDOWN:
 		case SDL_CONTROLLERAXISMOTION:
-			if (InputManager::GetControl() == InputManager::Control::Keyboard)
+			if (InputManager::GetControl() == Control::Keyboard)
 			{
-				InputManager::SetControl(InputManager::Control::Controller);
+				InputManager::SetControl(Control::Controller);
 			}
 			InputManager::InputKeyDown();
 			break;

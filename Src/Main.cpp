@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 		{
 			std::cout << "Controller not found" << std::endl;
 		}
-		InputManager::SetControl(InputManager::Control::Controller);
+		InputManager::SetControl(Control::Controller);
 	}
 
 	// game loop
