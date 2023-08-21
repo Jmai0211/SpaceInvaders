@@ -11,6 +11,7 @@
 #include "Map.h"
 #include "GameManager.h"
 #include "AssetManager.h"
+#include "AudioManager.h"
 
 SDL_Renderer* Game::renderer = nullptr;
 SDL_Window* Game::window = nullptr;
@@ -55,6 +56,8 @@ void Game::Init(const char* title, int xPos, int yPos)
 
 		TextManager::Init();
 
+		AudioManager::GetInstance().Init();
+
 		menu.SetUpMenu();
 
 		SDL_FreeSurface(iconSurface);
@@ -67,6 +70,7 @@ void Game::Init(const char* title, int xPos, int yPos)
 
 void Game::SetUpLevel()
 {
+	AudioManager::GetInstance().StopMusic();
 	// load game textures
 	aManager.AddTexture("Player", "Assets/Player.png");
 
@@ -87,6 +91,8 @@ void Game::SetUpLevel()
 	TextManager::AddText(1720, 70, std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str(), TextManager::GetFont("Normal"), "Health");
 	
 	GameManager::GetInstance().SetState(GameState::Playing);
+
+	AudioManager::GetInstance().PlayMusic("GameMusic");
 }
 
 void Game::BackToMainMenu()
@@ -95,6 +101,9 @@ void Game::BackToMainMenu()
 	TextManager::UnRegisterText("Record");
 	TextManager::UnRegisterText("Health");
 	TextManager::insertionOrder.clear();
+
+	AudioManager::GetInstance().StopMusic();
+	AudioManager::GetInstance().PlayMusic("BackgroundMusic");
 
 	std::vector<Entity*> temp = eManager.FindEntitiesWithSubstring("");
 	// destroy all remaining entities
@@ -190,7 +199,6 @@ void Game::HandleEvents()
 
 void Game::Update()
 {
-	std::vector<Entity*> temp;
 	InputManager::InputHold();
 	switch (GameManager::GetInstance().GetState())
 	{

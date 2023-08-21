@@ -63,15 +63,15 @@ public:
 
 	~Entity()
 	{
-		if (destroyEnemyCallback)
+		if (destroyCallback)
 		{
-			destroyEnemyCallback(this);
+			destroyCallback(this);
 		}
 	}
 
-	void SetDestroyEnemyCallback(std::function<void(Entity*)> callback)
+	void SetDestroyCallback(std::function<void(Entity*)> callback)
 	{
-		destroyEnemyCallback = callback;
+		destroyCallback = callback;
 	}
 
 	void Update()
@@ -137,7 +137,7 @@ private:
 	ComponentBitSet componentBitSet;
 	GroupBitSet groupBitSet;
 
-	std::function<void(Entity*)> destroyEnemyCallback;
+	std::function<void(Entity*)> destroyCallback;
 };
 
 class EntityManager

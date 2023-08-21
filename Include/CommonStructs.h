@@ -38,6 +38,7 @@ const TextData textDataTable[] = {
 	{"Language", "语言"},
 	{"English", "中文"},
 	{"Resolution", "分辨率"},
+	{"Volume", "音量"},
 	{"Fullscreen", "全屏"},
 	{"Game Over", "游戏结束"},
 	{"Press A to restart", "按下A重新开始游戏"},

@@ -36,7 +36,7 @@ void LevelManager::SpawnEnemy()
 
 			enemy.AddComponent<EnemyAIComponent>(1 + static_cast<int>(LevelManager::GetDifficulty() / 5), 3 + LevelManager::GetDifficulty());
 
-			enemy.SetDestroyEnemyCallback([this](Entity* enemy) {
+			enemy.SetDestroyCallback([this](Entity* enemy) {
 				CheckEnemySpawn();
 				});
 

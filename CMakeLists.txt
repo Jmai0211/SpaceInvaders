@@ -35,6 +35,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL2::SDL2main
     SDL2_ttf::SDL2_ttf
     SDL2_image::SDL2_image
+    SDL2_mixer::SDL2_mixer
 )
 
 # Add hints for finding the SDL2 and SDL2_ttf libraries
@@ -42,6 +43,7 @@ list(APPEND CMAKE_PREFIX_PATH
     ${LIBRARY_DIR}/SDL2-2.28.1
     ${LIBRARY_DIR}/SDL2_ttf-2.20.2
     ${LIBRARY_DIR}/SDL2_image-2.6.3
+    ${LIBRARY_DIR}/SDL2_mixer-2.6.3
 )
 
 # Find the SDL2 package
@@ -62,6 +64,12 @@ find_package(SDL2_image REQUIRED)
 # Link the found SDL2_image library to the target
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_image::SDL2_image)
 
+# Find the SDL2_mixer package
+find_package(SDL2_mixer REQUIRED)
+
+# Link the found SDL2_mixer library to the target
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_mixer::SDL2_mixer)
+
 # Copy SDL2 DLLs to the output directory (for running the executable)
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -80,6 +88,13 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${LIBRARY_DIR}/SDL2_image-2.6.3/lib/x64/SDL2_image.dll"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+)
+
+# Copy SDL2_mixer DLLs to the output directory (for running the executable)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${LIBRARY_DIR}/SDL2_mixer-2.6.3/lib/x64/SDL2_mixer.dll"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
 

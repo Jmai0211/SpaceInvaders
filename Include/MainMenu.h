@@ -44,6 +44,9 @@ private:
 	// Convert resolution from integer values to characters that can be displayed as text
 	const char* ConvertResolution(int width, int height);
 
+	// Convert volume from integer value to characters that can be displayed as text
+	const char* ConvertVolume(int volume);
+
 	static Game* game;
 
 	size_t menuIndex = 1;
@@ -53,5 +56,6 @@ private:
 	size_t resolutionIndex = 0;
 
 	std::string resolutionString;
+	std::string volumeString;
 };
 

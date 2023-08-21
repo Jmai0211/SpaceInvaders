@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <Game.h>
+#include "AudioManager.h"
 
 // return instance of game manager
 GameManager& GameManager::GetInstance()
@@ -113,6 +114,7 @@ void GameManager::SaveSettings()
     file << "Language=" << static_cast<int>(GetInstance().GetLanguage()) << "\n";
     file << "Width=" << currentResolution.first << "\n";
     file << "Height=" << currentResolution.second << "\n";
+    file << "Volume=" << AudioManager::GetInstance().GetMusicVolume() << "\n";
 
     // Close the file
     file.close();
@@ -135,6 +137,7 @@ void GameManager::LoadSettings()
     int language = 0;
     int width = 800;
     int height = 600;
+    int volume = 128;
 
     // Read the settings from the INI file
     std::string line;
@@ -152,6 +155,10 @@ void GameManager::LoadSettings()
         {
             height = std::stoi(line.substr(line.find("=") + 1));
         }
+        else if (line.find("Volume=") != std::string::npos)
+        {
+            volume = std::stoi(line.substr(line.find("=") + 1));
+        }
     }
 
     // Close the file
@@ -160,6 +167,7 @@ void GameManager::LoadSettings()
     // Set the loaded settings in the game manager
     GameManager::GetInstance().SetLanguage(static_cast<Language>(language));
     GameManager::GetInstance().SetResolution(width, height);
+    AudioManager::GetInstance().SetMusicVolume(volume);
 }
 
 void GameManager::SaveGame()
