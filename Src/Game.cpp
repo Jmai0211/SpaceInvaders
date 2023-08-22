@@ -125,6 +125,8 @@ void Game::GameOver()
 	GameManager::GetInstance().SetState(GameState::GameOver);
 	TextManager::AddText(960, 540, TextManager::GetLocalizedText("Game Over"), TextManager::GetFont("Large"), "GameOver");
 
+	AudioManager::GetInstance().StopMusic();
+
 	switch (InputManager::GetControl())
 	{
 	case Control::Keyboard:
@@ -296,4 +298,5 @@ void Game::Restart()
 	TextManager::textArray["Health"]->UpdateText(std::string(TextManager::GetLocalizedText("Health: ")).append(std::to_string(player->GetComponent<PlayerComponent>().GetHealth())).c_str());
 	GameManager::GetInstance().SetScore(0);
 	TextManager::textArray["Score"]->UpdateText(std::string(TextManager::GetLocalizedText("Score: ")).append(std::to_string(GameManager::GetInstance().GetScore())).c_str());
+	AudioManager::GetInstance().PlayMusic("GameMusic");
 }

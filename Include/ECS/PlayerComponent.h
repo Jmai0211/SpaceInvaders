@@ -17,23 +17,39 @@ public:
 
 	void Update() override
 	{
-		//// Player Y movement, uncomment if need to enable
-		//if (InputManager::GetKeyDown(InputManager::Action::UpMovement) && transform->Position.y >= 0)
-		//{
-		//	transform->Velocity.y = -1;
+	}
 
-		//	entity->GetComponent<SpriteComponent>().Play("Walk_Up");
-		//}
-		//else if (InputManager::GetKeyDown(InputManager::Action::DownMovement) 
-		//	&& transform->Position.y <= GameManager::GetInstance().GetResolution().second - transform->Size.y)
-		//{
-		//	transform->Velocity.y = 1;
-		//	entity->GetComponent<SpriteComponent>().Play("Walk_Down");
-		//}
-		//else
-		//{
-		//	transform->Velocity.y = 0;
-		//}
+	void VerticalMovement(int axisValue)
+	{
+		// move up
+		if (axisValue < 0)
+		{
+			if (transform->Position.y < GameManager::GetInstance().GetResolution().second - transform->Size.y)
+			{
+				transform->Velocity.y = 1;
+			}
+			else
+			{
+				transform->Velocity.y = 0;
+			}
+		}
+		// move down
+		else if (axisValue > 0)
+		{
+			if (transform->Position.y > 0)
+			{
+				transform->Velocity.y = -1;
+			}
+			else
+			{
+				transform->Velocity.y = 0;
+			}
+		}
+		// no movement
+		else
+		{
+			transform->Velocity.y = 0;
+		}
 	}
 
 	void HorizontalMovement(int axisValue)
@@ -44,7 +60,6 @@ public:
 			if (transform->Position.x > 0)
 			{
 				transform->Velocity.x = -1;
-				entity->GetComponent<SpriteComponent>().Play("Walk_Left");
 			}
 			else
 			{
@@ -71,6 +86,7 @@ public:
 		}
 	}
 
+	// Attack event
 	void Attack()
 	{
 		if (SDL_GetTicks() - lastFireTime >= 300)
@@ -80,6 +96,7 @@ public:
 		}
 	}
 
+	// On collision event
 	void OnCollision(CollisionTag _tag)
 	{
 		switch (_tag)

@@ -22,6 +22,8 @@ void MainMenu::SetUpMenu()
 	TextManager::AddText(960, 900, TextManager::GetLocalizedText("Exit Game"), TextManager::GetFont("Normal"), "ExitGame");
 
 	TextManager::textArray["StartGame"]->UpdateColor({ 255, 255, 0, 255 });
+
+	AudioManager::GetInstance().PlayMusic("BackgroundMusic");
 }
 
 void MainMenu::MenuConfirm()

@@ -111,6 +111,11 @@ void InputManager::InputKeyUp()
         {
             game->player->GetComponent<PlayerComponent>().HorizontalMovement(0);
         }
+
+        //if (!GetKey(Action::UpMovement) && !GetKey(Action::DownMovement))
+        //{
+        //    game->player->GetComponent<PlayerComponent>().VerticalMovement(0);
+        //}
         break;
     case GameState::GameOver:
         break;
@@ -128,6 +133,7 @@ void InputManager::InputHold()
     case GameState::Option:
         break;
     case GameState::Playing:
+        // horizontal movement
         if (GetKey(Action::LeftMovement))
         {
             game->player->GetComponent<PlayerComponent>().HorizontalMovement(-1);
@@ -140,7 +146,21 @@ void InputManager::InputHold()
         {
             game->player->GetComponent<PlayerComponent>().HorizontalMovement(0);
         }
-        
+
+        // Vertical movement
+        //if (GetKey(Action::DownMovement))
+        //{
+        //    game->player->GetComponent<PlayerComponent>().VerticalMovement(-1);
+        //}
+        //else if (GetKey(Action::UpMovement))
+        //{
+        //    game->player->GetComponent<PlayerComponent>().VerticalMovement(1);
+        //}
+        //else if (!GetKey(Action::DownMovement) && !GetKey(Action::UpMovement))
+        //{
+        //    game->player->GetComponent<PlayerComponent>().VerticalMovement(0);
+        //}
+
         if (GetKey(Action::Shoot))
         {
             game->player->GetComponent<PlayerComponent>().Attack();

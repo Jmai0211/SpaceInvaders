@@ -24,7 +24,6 @@ void AudioManager::Init()
 
 	LoadMusic("Assets/Menu.mp3", "BackgroundMusic");
 	LoadMusic("Assets/Game.mp3", "GameMusic");
-	PlayMusic("BackgroundMusic");
 }
 
 void AudioManager::SetMusicVolume(int volume)
