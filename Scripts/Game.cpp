@@ -284,8 +284,6 @@ void Game::SpawnPlayer()
 
 	player->AddComponent<ColliderComponent>(CollisionTag::Player);
 
-	player->GetComponent<ColliderComponent>().SetCollisionVisibility(true);
-
 	player->AddGroup(Player);
 }
 

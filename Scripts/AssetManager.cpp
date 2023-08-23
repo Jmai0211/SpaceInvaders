@@ -49,7 +49,6 @@ void AssetManager::CreateProjectile(Entity* parent, int direction, int speed, st
 	projectile.AddComponent<SpriteComponent>(id);
 	projectile.AddComponent<ProjectileComponent>(direction, speed);
 	projectile.AddComponent<ColliderComponent>(_tag);
-	projectile.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
 	projectile.AddGroup(Projectile);
 	AudioManager::GetInstance().PlaySoundEffect("ShootSound");
 }
