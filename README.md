@@ -31,7 +31,7 @@ The objective of Space Invaders is to destroy a fleet of aliens while avoiding t
 ## :framed_picture: Screenshots
 ![Main menu screen](Screenshots/MainMenu.PNG)
 ![Options menu screen](Screenshots/Options.PNG)
-![Gameplay screen](Screenshots/Game.png)
+![Gameplay screen](Screenshots/Game.PNG)
 
 ## :computer: Getting Started
 ### Visual Studio
