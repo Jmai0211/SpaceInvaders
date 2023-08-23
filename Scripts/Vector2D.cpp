@@ -2,8 +2,8 @@
 
 Vector2D::Vector2D()
 {
-	x = 0.0f;
-	y = 0.0f;
+	x = 0;
+	y = 0;
 }
 
 Vector2D::Vector2D(int _x, int _y)
@@ -74,8 +74,8 @@ Vector2D& Vector2D::operator*=(const int& i)
 
 Vector2D& Vector2D::Zero()
 {
-	this->x = 0.0f;
-	this->y = 0.0f;
+	this->x = 0;
+	this->y = 0;
 
 	return *this;
 }

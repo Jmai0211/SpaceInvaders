@@ -20,39 +20,44 @@ void AudioManager::Init()
 		std::cout << "Failed to initialize SDL Mixer: " << Mix_GetError() << std::endl;
 	}
 
-	SetMusicVolume(musicVolume);
+	SetMusicVolume(volume);
+	SetSoundVolume(volume / 5);
 
 	LoadMusic("Assets/Menu.mp3", "BackgroundMusic");
 	LoadMusic("Assets/Game.mp3", "GameMusic");
+	LoadSoundEffect("Assets/laser2.mp3", "ShootSound");
+	LoadSoundEffect("Assets/explosion6.mp3", "ExplodeSound");
 }
 
-void AudioManager::SetMusicVolume(int volume)
+void AudioManager::SetMusicVolume(int _volume)
 {
 	if (volume >= 0 && volume <= 128) 
 	{
-		musicVolume = volume;
-		Mix_VolumeMusic(musicVolume);
+		volume = _volume;
+		Mix_VolumeMusic(volume);
+		Mix_Volume(-1, volume / 5);
 		GameManager::GetInstance().SaveSettings();
 	}
 }
 
 int AudioManager::GetMusicVolume() const
 {
-	return musicVolume;
+	return volume;
 }
 
 void AudioManager::SetSoundVolume(int volume)
 {
-	if (volume >= 0 && volume <= 128) 
-	{
-		soundVolume = volume;
-		Mix_Volume(-1, soundVolume);
-	}
+	//if (volume >= 0 && volume <= 128) 
+	//{
+	//	soundVolume = volume;
+	//	Mix_Volume(-1, soundVolume);
+	//}
 }
 
 int AudioManager::GetSoundVolume() const
 {
-	return soundVolume;
+	/*return soundVolume;*/
+	return 0;
 }
 
 bool AudioManager::LoadMusic(const std::string& filePath, const std::string& musicID)

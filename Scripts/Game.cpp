@@ -274,7 +274,7 @@ void Game::SpawnPlayer()
 	player = &eManager.AddEntity("Player");
 
 	// add transform component for position and scale
-	player->AddComponent<TransformComponent>(960, 1000, 96, 96);
+	player->AddComponent<TransformComponent>(960, 960, 96, 96);
 
 	// add sprite component for rendering sprites
 	player->AddComponent<SpriteComponent>("Player");
@@ -283,6 +283,8 @@ void Game::SpawnPlayer()
 	player->AddComponent<PlayerComponent>(5);
 
 	player->AddComponent<ColliderComponent>(CollisionTag::Player);
+
+	player->GetComponent<ColliderComponent>().SetCollisionVisibility(true);
 
 	player->AddGroup(Player);
 }

@@ -135,9 +135,9 @@ void GameManager::LoadSettings()
 
     // Variables to store the loaded settings
     int language = 0;
-    int width = 800;
-    int height = 600;
-    int volume = 128;
+    int width = 1920;
+    int height = 1080;
+    int volume = 64;
 
     // Read the settings from the INI file
     std::string line;

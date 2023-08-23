@@ -22,7 +22,7 @@ public:
 	SDL_Texture* GetTexture(std::string id);
 
 	// Create a projectile entity with its required components
-	void CreateProjectile(Vector2D position, int direction, int speed, std::string id, CollisionTag _tag);
+	void CreateProjectile(Entity* parent, int direction, int speed, std::string id, CollisionTag _tag);
 
 	// Render all textures
 	void Render(SDL_Texture* texture, SDL_Rect srcRect, SDL_Rect destRect);

@@ -3,6 +3,7 @@
 
 AssetManager::~AssetManager()
 {
+	// Destroy all loaded textures
 	for (auto t : textures)
 	{
 		SDL_DestroyTexture(t.second);
@@ -26,15 +27,31 @@ SDL_Texture* AssetManager::GetTexture(std::string id)
 	return textures[id];
 }
 
-void AssetManager::CreateProjectile(Vector2D position, int direction, int speed, std::string id, CollisionTag _tag)
+void AssetManager::CreateProjectile(Entity* parent, int direction, int speed, std::string id, CollisionTag _tag)
 {
 	auto& projectile(EntityManager::GetInstance().AddEntity(id));
-	projectile.AddComponent<TransformComponent>(position.x, position.y, 64, 64, false);
+
+	// Calculate spawn transform information
+	int screenWidth = GameManager::GetInstance().GetResolution().first;
+	int screenHeight = GameManager::GetInstance().GetResolution().second;
+
+	float widthScale = static_cast<float>(screenWidth) / 1920.0f;
+	float heightScale = static_cast<float>(screenHeight) / 1080.0f;
+
+	// Calculate position based on the new size
+	int referenceX = static_cast<int>((32) * widthScale);
+	int referenceY = static_cast<int>((32) * heightScale);
+
+	int xPos = parent->GetComponent<TransformComponent>().Position.x + parent->GetComponent<TransformComponent>().Size.x / 2 - referenceX;
+	int yPos = parent->GetComponent<TransformComponent>().Position.y + parent->GetComponent<TransformComponent>().Size.y / 2 - referenceY;
+	projectile.AddComponent<TransformComponent>(xPos, yPos, 64, 64, false);
+
 	projectile.AddComponent<SpriteComponent>(id);
 	projectile.AddComponent<ProjectileComponent>(direction, speed);
 	projectile.AddComponent<ColliderComponent>(_tag);
 	projectile.GetComponent<ColliderComponent>().SetCollisionVisibility(true);
 	projectile.AddGroup(Projectile);
+	AudioManager::GetInstance().PlaySoundEffect("ShootSound");
 }
 
 SDL_Texture* AssetManager::LoadTexture(const char* fileName)

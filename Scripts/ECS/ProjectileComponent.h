@@ -6,11 +6,13 @@ class ProjectileComponent : public Component
 {
 public:
 	int movementDirection = 1;
+
 	ProjectileComponent(int _direction, int _speed)
 	{
 		movementDirection = _direction;
 		speed = _speed;
 	}
+
 	~ProjectileComponent()
 	{
 
@@ -19,6 +21,7 @@ public:
 	void Init() override
 	{
 		transform = &entity->GetComponent<TransformComponent>();
+		transform->CalculateAdjustedSpeed(speed);
 	}
 
 	void Update() override
@@ -29,7 +32,7 @@ public:
 		}
 		else
 		{
-			transform->Position.y -= movementDirection * speed;
+			transform->Velocity.y = -movementDirection;
 		}
 	}
 

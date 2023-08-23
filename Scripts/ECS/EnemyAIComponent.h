@@ -1,5 +1,6 @@
 #pragma once
 #include "Components.h"
+#include "AudioManager.h"
 
 class EnemyAIComponent : public Component
 {
@@ -20,7 +21,7 @@ public:
 
 		coolDown = rand() % 100 + 100;
 		
-		transform->speed = 4;
+		transform->CalculateAdjustedSpeed(4);
 	}
 
 	void Update() override
@@ -47,7 +48,7 @@ public:
 		{
 			if (RandomChance(30))
 			{
-				AssetManager::GetInstance().CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), -1, bulletSpeed, "EnemyBullet", CollisionTag::EnemyBullet);
+				AssetManager::GetInstance().CreateProjectile(entity, -1, bulletSpeed, "EnemyBullet", CollisionTag::EnemyBullet);
 			}
 			coolDown = rand() % 100 + 100;
 		}
@@ -65,6 +66,8 @@ public:
 			if (health <= 0)
 			{
 				entity->Destroy();
+
+				AudioManager::GetInstance().PlaySoundEffect("ExplodeSound");
 
 				// update score
 				GameManager::GetInstance().SetScore(GameManager::GetInstance().GetScore() + 1);

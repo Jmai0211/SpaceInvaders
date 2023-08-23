@@ -1,3 +1,4 @@
+#pragma once
 #include "SDL.h"
 #include "SDL_mixer.h"
 #include <string>
@@ -12,12 +13,12 @@ public:
 	void Init();
 
 	// Set music volume
-	void SetMusicVolume(int volume);
+	void SetMusicVolume(int _volume);
 	// Return music volume
 	int GetMusicVolume() const;
 
 	// Set sound volume
-	void SetSoundVolume(int volume);
+	void SetSoundVolume(int _volume);
 	// Return sound volume
 	int GetSoundVolume() const;
 
@@ -42,8 +43,7 @@ private:
 	AudioManager(const AudioManager&) = delete;
 	AudioManager& operator=(const AudioManager&) = delete;
 
-	int musicVolume;
-	int soundVolume;
+	int volume;
 
 	std::map<std::string, Mix_Music*> loadedMusic;
 	std::map<std::string, Mix_Chunk*> loadedSoundEffects;

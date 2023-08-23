@@ -12,7 +12,7 @@ public:
 	void Init() override
 	{
 		transform = &entity->GetComponent<TransformComponent>();
-		transform->speed = 6;
+		transform->CalculateAdjustedSpeed(6);
 	}
 
 	void Update() override
@@ -91,7 +91,7 @@ public:
 	{
 		if (SDL_GetTicks() - lastFireTime >= 300)
 		{
-			AssetManager::GetInstance().CreateProjectile(Vector2D(transform->Position.x + transform->Size.x / 2, transform->Position.y), 1, bulletSpeed, "PlayerBullet", CollisionTag::PlayerBullet);
+			AssetManager::GetInstance().CreateProjectile(entity, 1, bulletSpeed, "PlayerBullet", CollisionTag::PlayerBullet);
 			lastFireTime = SDL_GetTicks();
 		}
 	}

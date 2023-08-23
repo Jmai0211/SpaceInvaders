@@ -2,32 +2,31 @@ cmake_minimum_required(VERSION 3.0)
 project(SpaceInvaders)
 
 # set directories
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Src")
-set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Include")
+set(SCRIPT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Scripts")
 set(LIBRARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Libraries")
-set(ECS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Include/ECS")
+set(ECS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Scripts/ECS")
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Assets")
 
 # Add all the source files to the executable (for building the exe)
-file(GLOB_RECURSE SOURCE_FILES "${SOURCE_DIR}/*.cpp")
-file(GLOB_RECURSE HEADER_FILES "${INCLUDE_DIR}/*.h")
-file(GLOB_RECURSE ECS_HEADER "${ECS_DIR}/*.h")
-file(GLOB_RECURSE ECS_CPP "${ECS_DIR}/*.cpp")
+file(GLOB_RECURSE SOURCE_FILES "${SCRIPT_DIR}/*.cpp")
+file(GLOB_RECURSE HEADER_FILES "${SCRIPT_DIR}/*.h")
+file(GLOB_RECURSE ECS_FILES "${ECS_DIR}/*.h" "${ECS_DIR}/*.cpp")
+file(GLOB_RECURSE Asset_Files "${ASSETS_DIR}/*.png" "${ASSETS_DIR}/*.mp3" "${ASSETS_DIR}/*.ttf") 
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${ECS_HEADER} ${ECS_CPP})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${ECS_FILES} ${Asset_Files})
 
 # Include directories for the executable target
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${INCLUDE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/Src
-    ${CMAKE_CURRENT_SOURCE_DIR}/Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/Include/ECS
+    ${CMAKE_CURRENT_SOURCE_DIR}/Scripts
+    ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/ECS
+    ${CMAKE_CURRENT_SOURCE_DIR}/Assets
 )
 
 # Organize source files into virtual folders in the IDE solution
 source_group("Source Files" FILES ${SOURCE_FILES})
 source_group("Header Files" FILES ${HEADER_FILES})
-source_group("ECS" FILES ${ECS_HEADER} files ${ECS_CPP})
+source_group("ECS" FILES ${ECS_FILES})
+source_group("Assets" FILES ${Asset_Files})
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE

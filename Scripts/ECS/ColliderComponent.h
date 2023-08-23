@@ -42,27 +42,25 @@ public:
 		srcRect.w = 80;
 		srcRect.h = 80;
 
-		collider.w = static_cast<int>(transform->Size.x);
-		collider.h = static_cast<int>(transform->Size.y);
+		// Calculate the size of the collision box based on the scale
+		collider.w = transform->Size.x;
+		collider.h = transform->Size.y;
 
-		destRect.w = transform->Size.x;
-		destRect.h = transform->Size.y;
+		collider.x = transform->Position.x;
+		collider.y = transform->Position.y;
 	}
 
 	void Update() override
 	{
-		collider.x = static_cast<int>(transform->Position.x);
-		collider.y = static_cast<int>(transform->Position.y);
-
-		destRect.x = transform->Position.x;
-		destRect.y = transform->Position.y;
+		collider.x = transform->Position.x;
+		collider.y = transform->Position.y;
 	}
 
 	void Render() override
 	{
 		if (collisionVisible)
 		{
-			AssetManager::GetInstance().Render(texture, srcRect, destRect);
+			AssetManager::GetInstance().Render(texture, srcRect, collider);
 		}
 	}
 
@@ -97,7 +95,7 @@ public:
 
 private:
 	SDL_Texture* texture;
-	SDL_Rect destRect;
+	// used for collision box visual
 	SDL_Rect srcRect;
 	bool collisionVisible = false;
 };
